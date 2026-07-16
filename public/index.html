@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor Sistem Mati Listrik &amp; Genset</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0A0A0A;
+      color: #F9FAFB;
+    }
+
+    header {
+      background: #0D1B2A;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1E2D3D;
+    }
+
+    header h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .refresh-badge {
+      font-size: 12px;
+      color: #93c5fd;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* Nav tabs */
+    .nav {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: #0D1B2A;
+      border-radius: 10px;
+      border: 1px solid #1E2D3D;
+      padding: 6px;
+    }
+
+    .nav-btn {
+      flex: 1;
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 7px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #9CA3AF;
+      font-weight: 500;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .nav-btn:hover {
+      background: #1E2D3D;
+      color: #F9FAFB;
+    }
+
+    .nav-btn.active {
+      background: #22C55E;
+      color: #000;
+    }
+
+    /* Panel */
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    /* Sector cards */
+    .sector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .sector-card {
+      background: #111827;
+      border-radius: 10px;
+      border: 1px solid #1E2D3D;
+      padding: 16px;
+      border-top: 4px solid #2D3748;
+      transition: background 0.15s;
+    }
+
+    .sector-card:hover {
+      background: #1E2D3D;
+    }
+
+    .sector-card.status-on {
+      border-top-color: #22C55E;
+    }
+
+    .sector-card.status-off {
+      border-top-color: #EF4444;
+    }
+
+    .sc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .sc-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #9CA3AF;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .sc-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+
+    .sc-badge.on {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22C55E;
+    }
+
+    .sc-badge.off {
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444;
+    }
+
+    .sc-badge.unknown {
+      background: #1E2D3D;
+      color: #6B7280;
+    }
+
+    .sc-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .sc-stat {
+      background: #0A0A0A;
+      border-radius: 6px;
+      padding: 7px 9px;
+      border: 1px solid #1E2D3D;
+    }
+
+    .sc-stat-label {
+      font-size: 10px;
+      color: #6B7280;
+      margin-bottom: 2px;
+    }
+
+    .sc-stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #F9FAFB;
+    }
+
+    .sc-time {
+      font-size: 10px;
+      color: #6B7280;
+      margin-top: 8px;
+    }
+
+    /* Summary bar */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .sum-card {
+      background: #111827;
+      border-radius: 10px;
+      border: 1px solid #1E2D3D;
+      padding: 14px 16px;
+    }
+
+    .sum-label {
+      font-size: 11px;
+      color: #9CA3AF;
+      margin-bottom: 4px;
+    }
+
+    .sum-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #22C55E;
+    }
+
+    .sum-value.red {
+      color: #EF4444;
+    }
+
+    .sum-value.green {
+      color: #22C55E;
+    }
+
+    /* Section */
+    .section {
+      background: #111827;
+      border-radius: 10px;
+      border: 1px solid #1E2D3D;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #F9FAFB;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .filter-bar label {
+      font-size: 12px;
+      color: #9CA3AF;
+    }
+
+    select.fs {
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #2D3748;
+      background: #0D1B2A;
+      color: #F9FAFB;
+    }
+
+    .filter-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      font-size: 13px;
+      padding: 7px 14px;
+      border-radius: 6px;
+      border: 1px solid #2D3748;
+      background: #1E2D3D;
+      color: #F9FAFB;
+      cursor: pointer;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .btn:hover {
+      background: #2D3748;
+    }
+
+    .btn.primary {
+      background: #22C55E;
+      color: #000;
+      border-color: #22C55E;
+    }
+
+    .btn.primary:hover {
+      background: #16A34A;
+      border-color: #16A34A;
+    }
+
+    .btn.danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .btn.danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* ── Lucide Icons ─────────────────────────────── */
+    .icon {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    .icon-sm {
+      width: 14px;
+      height: 14px;
+    }
+
+    .icon-lg {
+      width: 28px;
+      height: 28px;
+      stroke-width: 1.5;
+    }
+
+    .header-icon {
+      width: 18px;
+      height: 18px;
+      stroke: #93c5fd;
+      stroke-width: 2;
+      fill: none;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    /* icon dalam kartu genset */
+    .genset-card-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: #9CA3AF;
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .genset-card.status-on .genset-card-icon svg {
+      stroke: #22C55E;
+    }
+
+    .genset-card.status-off .genset-card-icon svg {
+      stroke: #EF4444;
+    }
+
+    .btn.pdf {
+      background: #3B82F6;
+      color: #fff;
+      border-color: #3B82F6;
+    }
+
+    .btn.pdf:hover {
+      background: #2563EB;
+      border-color: #2563EB;
+    }
+
+    /* Table */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 600px;
+    }
+
+    th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: #6B7280;
+      padding: 8px 12px;
+      border-bottom: 1px solid #1E2D3D;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #1E2D3D;
+      white-space: nowrap;
+      color: #F9FAFB;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #1E2D3D;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 99px;
+    }
+
+    .badge.on {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22C55E;
+    }
+
+    .badge.off {
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .sector-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 99px;
+      background: rgba(34, 197, 94, 0.1);
+      color: #22C55E;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+
+    .empty {
+      text-align: center;
+      color: #6B7280;
+      padding: 32px;
+      font-size: 13px;
+    }
+
+    /* Chart */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-box {
+      background: #111827;
+      border-radius: 10px;
+      border: 1px solid #1E2D3D;
+      padding: 16px;
+    }
+
+    .chart-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #F9FAFB;
+      margin-bottom: 12px;
+    }
+
+    .chart-filter {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .chart-filter label {
+      font-size: 12px;
+      color: #9CA3AF;
+    }
+
+    /* Riwayat tabs */
+    .sub-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+
+    .sub-tab {
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid #2D3748;
+      background: #1E2D3D;
+      cursor: pointer;
+      color: #9CA3AF;
+      transition: background 0.15s;
+    }
+
+    .sub-tab.active {
+      background: #22C55E;
+      color: #000;
+      border-color: #22C55E;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      background: #111827;
+      border: 1px solid #1E2D3D;
+      border-radius: 12px;
+      padding: 24px;
+      width: 100%;
+      max-width: 440px;
+      margin: 16px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #F9FAFB;
+      margin-bottom: 4px;
+    }
+
+    .modal p {
+      font-size: 13px;
+      color: #9CA3AF;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      color: #9CA3AF;
+    }
+
+    .form-group input,
+    .form-group select {
+      font-size: 13px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      border: 1px solid #2D3748;
+      background: #0D1B2A;
+      color: #F9FAFB;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 18px;
+    }
+
+    .divider {
+      height: 1px;
+      background: #1E2D3D;
+      margin: 12px 0;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #9CA3AF;
+      margin-bottom: 8px;
+    }
+
+    .checkbox-row input[type=checkbox] {
+      width: 15px;
+      height: 15px;
+      accent-color: #22C55E;
+    }
+
+    /* ── Genset: Kartu status besar ─────────────────── */
+    .genset-status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .genset-card {
+      background: #111827;
+      border-radius: 10px;
+      border: 1px solid #1E2D3D;
+      padding: 18px 16px;
+      text-align: center;
+      border-top: 4px solid #2D3748;
+      transition: background 0.15s;
+    }
+
+    .genset-card:hover {
+      background: #1E2D3D;
+    }
+
+    .genset-card.status-on {
+      border-top-color: #22C55E;
+    }
+
+    .genset-card.status-off {
+      border-top-color: #EF4444;
+    }
+
+    .genset-card.status-unknown {
+      border-top-color: #6B7280;
+    }
+
+    .genset-card-icon {
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+
+    .genset-card-label {
+      font-size: 11px;
+      color: #6B7280;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .genset-card-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #F9FAFB;
+    }
+
+    .genset-card-value.on {
+      color: #22C55E;
+    }
+
+    .genset-card-value.off {
+      color: #EF4444;
+    }
+
+    .genset-card-sub {
+      font-size: 11px;
+      color: #6B7280;
+      margin-top: 4px;
+    }
+
+    /* ── Genset: Grid nilai (arus & daya) ─────────────── */
+    .genset-val-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .genset-val-card {
+      background: #111827;
+      border-radius: 10px;
+      border: 1px solid #1E2D3D;
+      padding: 14px 16px;
+      transition: background 0.15s;
+    }
+
+    .genset-val-card:hover {
+      background: #1E2D3D;
+    }
+
+    .genset-val-label {
+      font-size: 11px;
+      color: #6B7280;
+      margin-bottom: 4px;
+    }
+
+    .genset-val-number {
+      font-size: 20px;
+      font-weight: 700;
+      color: #22C55E;
+    }
+
+    .genset-val-unit {
+      font-size: 12px;
+      font-weight: 400;
+      color: #9CA3AF;
+      margin-left: 2px;
+    }
+
+    /* ── Genset: Total daya highlight ─────────────────── */
+    .genset-total-daya {
+      background: linear-gradient(135deg, #0D1B2A 0%, #1E3A5F 50%, #166534 100%);
+      border: 1px solid #1E2D3D;
+      border-radius: 10px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    .genset-total-daya-label {
+      font-size: 13px;
+      color: #9CA3AF;
+    }
+
+    .genset-total-daya-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: #22C55E;
+    }
+
+    /* Toast */
+    #toast {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 13px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      z-index: 200;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    #toast.success {
+      background: #0D1B2A;
+      color: #22C55E;
+      border: 1px solid #22C55E;
+    }
+
+    #toast.error {
+      background: #0D1B2A;
+      color: #EF4444;
+      border: 1px solid #EF4444;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>
+      <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+      </svg>
+      Monitor Sistem Mati Listrik
+    </h1>
+    <div class="refresh-badge">
+      <div class="pulse"></div><span id="last-update">Menunggu data...</span>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Nav -->
+    <div class="nav">
+      <button class="nav-btn active" onclick="switchNav('dashboard')" id="nav-dashboard">Dashboard</button>
+      <button class="nav-btn" onclick="switchNav('grafik')" id="nav-grafik">Grafik</button>
+      <button class="nav-btn" onclick="switchNav('riwayat')" id="nav-riwayat">Riwayat</button>
+      <button class="nav-btn" onclick="switchNav('log')" id="nav-log">Log</button>
+      <button class="nav-btn" onclick="switchNav('genset')" id="nav-genset">
+        <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        </svg>
+        Genset
+      </button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- PANEL: DASHBOARD                           -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="panel active" id="panel-dashboard">
+
+      <!-- Summary bar -->
+      <div class="summary-bar">
+        <div class="sum-card">
+          <div class="sum-label">Total kejadian</div>
+          <div class="sum-value" id="sum-total">0</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-label">Sektor mati saat ini</div>
+          <div class="sum-value red" id="sum-off">0</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-label">Sektor normal</div>
+          <div class="sum-value green" id="sum-on">0</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-label">Total durasi mati</div>
+          <div class="sum-value" id="sum-durasi">0 mnt</div>
+        </div>
+      </div>
+
+      <!-- Sector cards -->
+      <div class="sector-grid" id="sector-grid"></div>
+
+      <!-- Tabel terbaru -->
+      <div class="section">
+        <div class="section-title">
+          Kejadian terbaru
+          <button class="btn pdf" onclick="bukaModalPDF()">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+            Export PDF
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Sektor</th>
+                <th>Waktu</th>
+                <th>Status</th>
+                <th>Tegangan</th>
+                <th>Durasi Mati</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-recent">
+              <tr>
+                <td colspan="5" class="empty">Menunggu data dari ESP32...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- PANEL: GRAFIK                              -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-grafik">
+      <div class="section">
+        <div class="section-title">Grafik Tegangan per Sektor</div>
+        <div class="chart-filter">
+          <label>Sektor:</label>
+          <select class="fs" id="chart-sector-filter" onchange="renderGrafik()">
+            <option value="">Semua</option>
+            <option value="sector_1">Transmisi Manado</option>
+            <option value="sector_2">Transmisi Makawemben</option>
+            <option value="sector_3">Transmisi Boroko</option>
+            <option value="sector_4">Transmisi Lirung</option>
+            <option value="sector_5">Transmisi Tahuna</option>
+          </select>
+          <label>Data terakhir:</label>
+          <select class="fs" id="chart-limit" onchange="renderGrafik()">
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <canvas id="chartTegangan" height="100"></canvas>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-box">
+          <div class="chart-title">Jumlah Mati Listrik per Sektor</div>
+          <canvas id="chartMatiPerSektor" height="180"></canvas>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Total Durasi Mati per Sektor (menit)</div>
+          <canvas id="chartDurasiPerSektor" height="180"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- PANEL: RIWAYAT                             -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-riwayat">
+      <div class="section">
+        <div class="section-title">Riwayat Kejadian</div>
+        <div class="sub-tabs">
+          <button class="sub-tab active" onclick="switchRiwayat('hari')" id="rtab-hari">Per Hari</button>
+          <button class="sub-tab" onclick="switchRiwayat('minggu')" id="rtab-minggu">Per Minggu</button>
+          <button class="sub-tab" onclick="switchRiwayat('bulan')" id="rtab-bulan">Per Bulan</button>
+        </div>
+        <div class="chart-filter">
+          <label>Sektor:</label>
+          <select class="fs" id="riwayat-sector" onchange="renderRiwayat()">
+            <option value="">Semua sektor</option>
+            <option value="sector_1">Transmisi Manado</option>
+            <option value="sector_2">Transmisi Makawemben</option>
+            <option value="sector_3">Transmisi Boroko</option>
+            <option value="sector_4">Transmisi Lirung</option>
+            <option value="sector_5">Transmisi Tahuna</option>
+          </select>
+        </div>
+        <canvas id="chartRiwayat" height="100"></canvas>
+      </div>
+
+      <div class="section">
+        <div class="section-title" id="riwayat-table-title">Ringkasan Per Hari</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th id="riwayat-th-periode">Tanggal</th>
+                <th>Total Kejadian</th>
+                <th>Total Mati</th>
+                <th>Total Durasi (mnt)</th>
+                <th>Tegangan Rata-rata</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-riwayat">
+              <tr>
+                <td colspan="5" class="empty">Belum ada data</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- PANEL: LOG                                 -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-log">
+      <div class="section">
+        <div class="section-title">
+          Log Semua Kejadian
+          <div style="display:flex;gap:8px">
+            <button class="btn pdf" onclick="bukaModalPDF()">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+              Export PDF
+            </button>
+            <button class="btn danger" onclick="hapusSemua()">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+              </svg>
+              Hapus Semua
+            </button>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <label>Sektor:</label>
+          <select class="fs" id="filter-sector" onchange="renderLog()">
+            <option value="">Semua sektor</option>
+            <option value="sector_1">Transmisi Manado</option>
+            <option value="sector_2">Transmisi Makawemben</option>
+            <option value="sector_3">Transmisi Boroko</option>
+            <option value="sector_4">Transmisi Lirung</option>
+            <option value="sector_5">Transmisi Tahuna</option>
+          </select>
+          <label>Status:</label>
+          <select class="fs" id="filter-status" onchange="renderLog()">
+            <option value="">Semua status</option>
+            <option value="ON">ON</option>
+            <option value="OFF">OFF</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Sektor</th>
+                <th>Waktu</th>
+                <th>Status</th>
+                <th>Tegangan</th>
+                <th>Durasi Mati</th>
+                <th>Diterima Server</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-log">
+              <tr>
+                <td colspan="7" class="empty">Belum ada data</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- PANEL: GENSET                             -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="panel" id="panel-genset">
+
+      <!-- Kartu Status Utama -->
+      <div class="genset-status-grid" id="genset-status-grid">
+        <div class="genset-card status-unknown" id="gcard-genset">
+          <div class="genset-card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+          </div>
+          <div class="genset-card-label">Status Genset</div>
+          <div class="genset-card-value" id="gval-status-genset">—</div>
+          <div class="genset-card-sub" id="gsub-genset">Menunggu data...</div>
+        </div>
+        <div class="genset-card status-unknown" id="gcard-pln">
+          <div class="genset-card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <rect x="6" y="2" width="4" height="6" />
+              <rect x="14" y="2" width="4" height="6" />
+              <path d="M18 8H6l-1 7h14l-1-7z" />
+              <path d="M9 15v7" />
+              <path d="M15 15v7" />
+            </svg>
+          </div>
+          <div class="genset-card-label">Status PLN (sensor genset)</div>
+          <div class="genset-card-value" id="gval-status-pln">—</div>
+          <div class="genset-card-sub" id="gsub-pln">Menunggu data...</div>
+        </div>
+        <div class="genset-card">
+          <div class="genset-card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="5" rx="9" ry="3" />
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+            </svg>
+          </div>
+          <div class="genset-card-label">Total data diterima</div>
+          <div class="genset-card-value" id="gval-total">0</div>
+          <div class="genset-card-sub" id="gsub-waktu">—</div>
+        </div>
+        <div class="genset-card">
+          <div class="genset-card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
+          <div class="genset-card-label">Total genset aktif</div>
+          <div class="genset-card-value" id="gval-genset-on">0</div>
+          <div class="genset-card-sub">kali data ON</div>
+        </div>
+      </div>
+
+      <!-- Kartu Nilai Arus & Daya -->
+      <div class="genset-val-grid">
+        <div class="genset-val-card">
+          <div class="genset-val-label">Arus Phase R</div>
+          <div class="genset-val-number" id="gval-arus-r">—<span class="genset-val-unit">A</span></div>
+        </div>
+        <div class="genset-val-card">
+          <div class="genset-val-label">Arus Phase S</div>
+          <div class="genset-val-number" id="gval-arus-s">—<span class="genset-val-unit">A</span></div>
+        </div>
+        <div class="genset-val-card">
+          <div class="genset-val-label">Daya Phase R</div>
+          <div class="genset-val-number" id="gval-daya-r">—<span class="genset-val-unit">W</span></div>
+        </div>
+        <div class="genset-val-card">
+          <div class="genset-val-label">Daya Phase S</div>
+          <div class="genset-val-number" id="gval-daya-s">—<span class="genset-val-unit">W</span></div>
+        </div>
+      </div>
+
+      <!-- Total Daya Highlight -->
+      <div class="genset-total-daya">
+        <div class="genset-total-daya-label">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            style="width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;vertical-align:middle;margin-right:5px;">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          Total Daya Gabungan (R + S)
+        </div>
+        <div class="genset-total-daya-value" id="gval-total-daya">— W</div>
+      </div>
+
+      <!-- Grafik Arus -->
+      <div class="section">
+        <div class="section-title">
+          Grafik Arus (Ampere)
+          <div class="chart-filter">
+            <label>Data terakhir:</label>
+            <select class="fs" id="genset-chart-limit" onchange="renderGensetGrafik()">
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+        </div>
+        <canvas id="chartGensetArus" height="100"></canvas>
+      </div>
+
+      <!-- Grafik Daya -->
+      <div class="section">
+        <div class="section-title">Grafik Daya (Watt)</div>
+        <canvas id="chartGensetDaya" height="100"></canvas>
+      </div>
+
+      <!-- Tabel Log Genset -->
+      <div class="section">
+        <div class="section-title">
+          Log Data Genset
+          <div style="display:flex;gap:8px">
+            <button class="btn pdf" onclick="bukaModalPDFGenset()">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+              Export PDF
+            </button>
+            <button class="btn danger" onclick="hapusDataGenset()">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+              </svg>
+              Hapus Data
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Waktu</th>
+                <th>Status Genset</th>
+                <th>Status PLN</th>
+                <th>Arus R</th>
+                <th>Arus S</th>
+                <th>Daya R</th>
+                <th>Daya S</th>
+                <th>Diterima Server</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-genset">
+              <tr>
+                <td colspan="9" class="empty">Menunggu data dari alat genset...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /panel-genset -->
+
+  </div><!-- /container -->
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- Modal PDF PLN -->
+  <div class="modal-backdrop" id="modal-pdf">
+    <div class="modal">
+      <h3>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+        Export PDF — Data PLN
+      </h3>
+      <p>Atur isi laporan yang akan diunduh</p>
+      <div class="form-group">
+        <label>Judul laporan</label>
+        <input type="text" id="pdf-judul" value="Laporan Monitoring Mati Listrik">
+      </div>
+      <div class="form-group">
+        <label>Filter sektor</label>
+        <select id="pdf-sector">
+          <option value="">Semua sektor</option>
+          <option value="sector_1">Transmisi Manado</option>
+          <option value="sector_2">Transmisi Makawemben</option>
+          <option value="sector_3">Transmisi Boroko</option>
+          <option value="sector_4">Transmisi Lirung</option>
+          <option value="sector_5">Transmisi Tahuna</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Filter status</label>
+        <select id="pdf-status">
+          <option value="">Semua status</option>
+          <option value="ON">ON</option>
+          <option value="OFF">OFF</option>
+        </select>
+      </div>
+      <div class="divider"></div>
+      <div class="checkbox-row"><input type="checkbox" id="pdf-inc-stats" checked> Tabel statistik per sektor</div>
+      <div class="checkbox-row"><input type="checkbox" id="pdf-inc-log" checked> Tabel log detail</div>
+      <div class="form-group" style="margin-top:10px">
+        <label>Nama file</label>
+        <input type="text" id="pdf-filename" value="laporan-iot-listrik">
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="tutupModalPDF()">Batal</button>
+        <button class="btn pdf" onclick="exportPDF()">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Unduh PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal PDF Genset -->
+  <div class="modal-backdrop" id="modal-pdf-genset">
+    <div class="modal">
+      <h3>
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+        Export PDF — Data Genset
+      </h3>
+      <p>Atur isi laporan genset yang akan diunduh</p>
+      <div class="form-group">
+        <label>Judul laporan</label>
+        <input type="text" id="gpdf-judul" value="Laporan Monitoring Genset">
+      </div>
+      <div class="divider"></div>
+      <div class="checkbox-row"><input type="checkbox" id="gpdf-inc-stats" checked> Ringkasan statistik genset</div>
+      <div class="checkbox-row"><input type="checkbox" id="gpdf-inc-log" checked> Tabel log detail genset</div>
+      <div class="form-group" style="margin-top:10px">
+        <label>Nama file</label>
+        <input type="text" id="gpdf-filename" value="laporan-genset">
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="tutupModalPDFGenset()">Batal</button>
+        <button class="btn pdf" onclick="exportPDFGenset()">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Unduh PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ════════════════════════════════════════════════════
+    // STATE
+    // ════════════════════════════════════════════════════
+    const SECTORS = ['sector_1', 'sector_2', 'sector_3', 'sector_4', 'sector_5'];
+
+    // Mapping ID sektor ke nama tampilan (nama lokasi transmisi TVRI)
+    const SECTOR_NAMES = {
+      sector_1: 'Transmisi Manado',
+      sector_2: 'Transmisi Makawemben',
+      sector_3: 'Transmisi Boroko',
+      sector_4: 'Transmisi Lirung',
+      sector_5: 'Transmisi Tahuna'
+    };
+
+    // Helper: kembalikan nama tampilan sektor; fallback ke sector_id jika tidak ada
+    function namaSektor(id) {
+      return SECTOR_NAMES[id] ?? id;
+    }
+    let allData = [];
+    let statsData = {};
+    let riwayatMode = 'hari';
+    let chartTeg, chartMati, chartDurasi, chartRiwayat;
+
+    // State genset
+    let gensetData = [];
+    let gensetStats = {};
+    let chartGensetArus, chartGensetDaya;
+
+    // ════════════════════════════════════════════════════
+    // NAV
+    // ════════════════════════════════════════════════════
+    function switchNav(name) {
+      // Semua panel termasuk genset
+      ['dashboard', 'grafik', 'riwayat', 'log', 'genset'].forEach(p => {
+        document.getElementById('panel-' + p).classList.toggle('active', p === name);
+        document.getElementById('nav-' + p).classList.toggle('active', p === name);
+      });
+      if (name === 'grafik') renderGrafik();
+      if (name === 'riwayat') renderRiwayat();
+      if (name === 'log') renderLog();
+      if (name === 'genset') renderGenset();
+    }
+
+    function switchRiwayat(mode) {
+      riwayatMode = mode;
+      ['hari', 'minggu', 'bulan'].forEach(m => {
+        document.getElementById('rtab-' + m).classList.toggle('active', m === mode);
+      });
+      const labels = { hari: 'Per Hari', minggu: 'Per Minggu', bulan: 'Per Bulan' };
+      const thLabels = { hari: 'Tanggal', minggu: 'Minggu', bulan: 'Bulan' };
+      document.getElementById('riwayat-table-title').textContent = 'Ringkasan ' + labels[mode];
+      document.getElementById('riwayat-th-periode').textContent = thLabels[mode];
+      renderRiwayat();
+    }
+
+    // ════════════════════════════════════════════════════
+    // FETCH DATA
+    // ════════════════════════════════════════════════════
+    async function fetchData() {
+      try {
+        const [r1, r2] = await Promise.all([
+          fetch('/api/listrik').then(r => r.json()),
+          fetch('/api/listrik/stats').then(r => r.json())
+        ]);
+        allData = r1.data || [];
+        statsData = r2;
+
+        renderDashboard();
+        document.getElementById('last-update').textContent = 'Update: ' + new Date().toLocaleTimeString('id-ID');
+
+        // Update panel aktif
+        const aktif = document.querySelector('.panel.active')?.id?.replace('panel-', '');
+        if (aktif === 'grafik') renderGrafik();
+        if (aktif === 'riwayat') renderRiwayat();
+        if (aktif === 'log') renderLog();
+      } catch (e) { }
+    }
+
+    // ════════════════════════════════════════════════════
+    // DASHBOARD
+    // ════════════════════════════════════════════════════
+    function renderDashboard() {
+      const sektors = statsData.sectors || [];
+
+      // Summary bar
+      const totalOff = sektors.filter(s => s.statusTerakhir === 'OFF').length;
+      const totalOn = sektors.filter(s => s.statusTerakhir === 'ON').length;
+      const totalDurasi = sektors.reduce((s, d) => s + d.totalDurasiMati, 0);
+      document.getElementById('sum-total').textContent = statsData.globalTotal || 0;
+      document.getElementById('sum-off').textContent = totalOff;
+      document.getElementById('sum-on').textContent = totalOn;
+      document.getElementById('sum-durasi').textContent = formatDurasi(totalDurasi);
+
+      // Sector cards
+      const grid = document.getElementById('sector-grid');
+      grid.innerHTML = sektors.map(s => {
+        const st = s.statusTerakhir;
+        const stClass = st === 'ON' ? 'on' : st === 'OFF' ? 'off' : 'unknown';
+        const stLabel = st ?? '—';
+        // Ambil tegangan terakhir
+        const lastRecord = allData.find(d => d.sector_id === s.sector_id);
+        const tegTerakhir = lastRecord?.tegangan != null ? lastRecord.tegangan + ' V' : '—';
+        return `
+        <div class="sector-card status-${stClass}">
+          <div class="sc-header">
+            <div class="sc-name">${namaSektor(s.sector_id)}</div>
+            <span class="sc-badge ${stClass}">${stLabel}</span>
+          </div>
+          <div class="sc-stats">
+            <div class="sc-stat">
+              <div class="sc-stat-label">Tegangan</div>
+              <div class="sc-stat-value">${tegTerakhir}</div>
+            </div>
+            <div class="sc-stat">
+              <div class="sc-stat-label">Total mati</div>
+              <div class="sc-stat-value">${s.totalMati}x</div>
+            </div>
+            <div class="sc-stat">
+              <div class="sc-stat-label">Total durasi</div>
+              <div class="sc-stat-value">${formatDurasi(s.totalDurasiMati)}</div>
+            </div>
+            <div class="sc-stat">
+              <div class="sc-stat-label">Total kejadian</div>
+              <div class="sc-stat-value">${s.totalKejadian}</div>
+            </div>
+          </div>
+          <div class="sc-time">${s.waktuTerakhir ?? 'Belum ada data'}</div>
+        </div>`;
+      }).join('');
+
+      // Tabel recent (10 terbaru)
+      const tbody = document.getElementById('tbody-recent');
+      if (!allData.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">Menunggu data dari ESP32...</td></tr>';
+        return;
+      }
+      tbody.innerHTML = allData.slice(0, 10).map(r => `
+      <tr>
+        <td><span class="sector-pill">${namaSektor(r.sector_id)}</span></td>
+        <td style="font-size:12px">${r.waktu}</td>
+        <td><span class="badge ${r.status.toLowerCase()}"><span class="dot"></span>${r.status}</span></td>
+        <td>${r.tegangan != null ? r.tegangan + ' V' : '—'}</td>
+        <td>${formatDurasiRow(r.durasi_mati)}</td>
+      </tr>`).join('');
+    }
+
+    // ════════════════════════════════════════════════════
+    // GRAFIK
+    // ════════════════════════════════════════════════════
+    function renderGrafik() {
+      const sektorF = document.getElementById('chart-sector-filter').value;
+      const limit = parseInt(document.getElementById('chart-limit').value);
+
+      let data = allData;
+      if (sektorF) data = data.filter(d => d.sector_id === sektorF);
+      data = data.slice(0, limit).reverse();
+
+      // Chart tegangan (line)
+      const labels = data.map(d => d.waktu.slice(11, 16) + ' ' + namaSektor(d.sector_id).replace('Transmisi ', 'T.'));
+      const tegValues = data.map(d => d.tegangan ?? 0);
+
+      if (chartTeg) chartTeg.destroy();
+      chartTeg = new Chart(document.getElementById('chartTegangan'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Tegangan (V)',
+            data: tegValues,
+            borderColor: '#22C55E',
+            backgroundColor: 'rgba(34,197,94,0.1)',
+            tension: 0.3,
+            fill: true,
+            pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true, max: 260,
+              grid: { color: 'rgba(255,255,255,0.06)' },
+              ticks: { callback: v => v + 'V', color: '#9CA3AF' }
+            },
+            x: { ticks: { maxTicksLimit: 10, font: { size: 10 }, color: '#6B7280' }, grid: { display: false } }
+          }
+        }
+      });
+
+      // Chart mati per sektor (bar)
+      const sektors = statsData.sectors || [];
+      const matiVals = sektors.map(s => s.totalMati);
+      const durasiVals = sektors.map(s => s.totalDurasiMati);
+      const sLabels = sektors.map(s => namaSektor(s.sector_id));
+
+      if (chartMati) chartMati.destroy();
+      chartMati = new Chart(document.getElementById('chartMatiPerSektor'), {
+        type: 'bar',
+        data: {
+          labels: sLabels,
+          datasets: [{
+            label: 'Jumlah mati',
+            data: matiVals,
+            backgroundColor: ['#22C55E', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: '#9CA3AF' }, grid: { color: 'rgba(255,255,255,0.06)' } } }
+        }
+      });
+
+      if (chartDurasi) chartDurasi.destroy();
+      chartDurasi = new Chart(document.getElementById('chartDurasiPerSektor'), {
+        type: 'bar',
+        data: {
+          labels: sLabels,
+          datasets: [{
+            label: 'Durasi (mnt)',
+            data: durasiVals,
+            backgroundColor: ['#22C55E', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { color: '#9CA3AF' }, grid: { color: 'rgba(255,255,255,0.06)' } } }
+        }
+      });
+    }
+
+    // ════════════════════════════════════════════════════
+    // RIWAYAT
+    // ════════════════════════════════════════════════════
+    function getPeriodeKey(waktu, mode) {
+      if (!waktu) return '—';
+      const d = new Date(waktu.replace(' ', 'T'));
+      if (isNaN(d)) return '—';
+      if (mode === 'hari') return waktu.slice(0, 10);
+      if (mode === 'bulan') return waktu.slice(0, 7);
+      if (mode === 'minggu') {
+        // Minggu ke-N tahun ini
+        const start = new Date(d.getFullYear(), 0, 1);
+        const week = Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7);
+        return d.getFullYear() + '-W' + String(week).padStart(2, '0');
+      }
+      return waktu.slice(0, 10);
+    }
+
+    function renderRiwayat() {
+      const sektorF = document.getElementById('riwayat-sector').value;
+      let data = allData;
+      if (sektorF) data = data.filter(d => d.sector_id === sektorF);
+
+      // Group by periode
+      const groups = {};
+      data.forEach(r => {
+        const key = getPeriodeKey(r.waktu, riwayatMode);
+        if (!groups[key]) groups[key] = { kejadian: 0, mati: 0, durasi: 0, tegTotal: 0, tegCount: 0 };
+        groups[key].kejadian++;
+        if (r.status === 'OFF') groups[key].mati++;
+        if (r.durasi_mati > 0) groups[key].durasi += Number(r.durasi_mati);
+        if (r.tegangan > 0) { groups[key].tegTotal += Number(r.tegangan); groups[key].tegCount++; }
+      });
+
+      const sorted = Object.keys(groups).sort().reverse();
+
+      // Chart riwayat
+      const rLabels = [...sorted].reverse();
+      const rMati = rLabels.map(k => groups[k].mati);
+      const rDurasi = rLabels.map(k => groups[k].durasi);
+
+      if (chartRiwayat) chartRiwayat.destroy();
+      chartRiwayat = new Chart(document.getElementById('chartRiwayat'), {
+        type: 'bar',
+        data: {
+          labels: rLabels,
+          datasets: [
+            { label: 'Jumlah mati', data: rMati, backgroundColor: '#EF4444', yAxisID: 'y' },
+            { label: 'Durasi (mnt)', data: rDurasi, backgroundColor: '#3B82F6', yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: '#9CA3AF' } } },
+          scales: {
+            y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Jumlah mati', color: '#9CA3AF' }, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#9CA3AF' } },
+            y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Durasi (mnt)', color: '#9CA3AF' }, grid: { drawOnChartArea: false }, ticks: { color: '#9CA3AF' } }
+          }
+        }
+      });
+
+      // Tabel riwayat
+      const tbody = document.getElementById('tbody-riwayat');
+      if (!sorted.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">Belum ada data</td></tr>';
+        return;
+      }
+      tbody.innerHTML = sorted.map(k => {
+        const g = groups[k];
+        const avgTeg = g.tegCount ? (g.tegTotal / g.tegCount).toFixed(1) + ' V' : '—';
+        return `<tr>
+        <td style="font-weight:600">${k}</td>
+        <td>${g.kejadian}</td>
+        <td>${g.mati}</td>
+        <td>${g.durasi}</td>
+        <td>${avgTeg}</td>
+      </tr>`;
+      }).join('');
+    }
+
+    // ════════════════════════════════════════════════════
+    // LOG
+    // ════════════════════════════════════════════════════
+    function renderLog() {
+      const sF = document.getElementById('filter-sector').value;
+      const stF = document.getElementById('filter-status').value;
+      let data = allData;
+      if (sF) data = data.filter(d => d.sector_id === sF);
+      if (stF) data = data.filter(d => d.status === stF);
+
+      const tbody = document.getElementById('tbody-log');
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty">Tidak ada data sesuai filter</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(r => `
+      <tr>
+        <td style="color:#bbb;font-size:11px">#${r.id}</td>
+        <td><span class="sector-pill">${namaSektor(r.sector_id)}</span></td>
+        <td style="font-size:12px">${r.waktu}</td>
+        <td><span class="badge ${r.status.toLowerCase()}"><span class="dot"></span>${r.status}</span></td>
+        <td>${r.tegangan != null ? r.tegangan + ' V' : '—'}</td>
+        <td>${formatDurasiRow(r.durasi_mati)}</td>
+        <td style="font-size:11px;color:#888">${r.diterima_at}</td>
+      </tr>`).join('');
+    }
+
+    async function hapusSemua() {
+      if (!confirm('Hapus semua data log dari semua sektor?')) return;
+      await fetch('/api/listrik', { method: 'DELETE' });
+      showToast('Semua data dihapus', 'success');
+      fetchData();
+    }
+
+    // ════════════════════════════════════════════════════
+    // EXPORT PDF
+    // ════════════════════════════════════════════════════
+
+    // Cache base64 logo agar tidak di-fetch ulang setiap kali export
+    let _logoBase64Cache = null;
+
+    /**
+     * getLogoBase64() — Muat logo TVRI dari server dan kembalikan sebagai data URL.
+     * Hasil di-cache agar fetch hanya terjadi sekali.
+     */
+    async function getLogoBase64() {
+      if (_logoBase64Cache) return _logoBase64Cache;
+      try {
+        const resp = await fetch('/logo-tvri.jpg');
+        const blob = await resp.blob();
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => { _logoBase64Cache = reader.result; resolve(_logoBase64Cache); };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        console.warn('[PDF] Gagal memuat logo TVRI:', e);
+        return null;
+      }
+    }
+
+    /**
+     * gambarHeaderTVRI() — Gambar header institusi TVRI di halaman pertama PDF.
+     * @param {jsPDF} doc  - instance jsPDF
+     * @param {number} W   - lebar halaman (mm)
+     * @param {string|null} logoDataUrl - base64 data URL logo, atau null jika gagal dimuat
+     * @returns {number} curY - posisi Y setelah header (siap untuk konten berikutnya)
+     */
+    function gambarHeaderTVRI(doc, W, logoDataUrl) {
+      const logoH = 18;   // tinggi logo dalam mm
+      const logoW = 18;   // lebar logo (akan disesuaikan aspek rasio)
+      const startY = 8;
+      const textX = 14 + (logoDataUrl ? logoW + 4 : 0);
+
+      // Gambar logo jika berhasil dimuat
+      if (logoDataUrl) {
+        doc.addImage(logoDataUrl, 'JPEG', 10, startY, logoW, logoH);
+      }
+
+      // Teks institusi di sisi kanan logo
+      doc.setTextColor(30, 58, 95);
+      doc.setFontSize(9); doc.setFont(undefined, 'bold');
+      doc.text(
+        'LEMBAGA PENYIARAN PUBLIK TELEVISI REPUBLIK INDONESIA',
+        textX, startY + 5
+      );
+      doc.text('STASIUN SULAWESI UTARA', textX, startY + 10);
+
+      doc.setFontSize(7.5); doc.setFont(undefined, 'normal');
+      doc.text('JL. TELEVISI, BANJER-TIKALA MANADO, SULAWESI UTARA 95125 INDONESIA', textX, startY + 15);
+      doc.text('P (0431) 868001   F (0431) 860403   WWW.TVRI.GO.ID', textX, startY + 19.5);
+
+      // Garis pemisah tebal navy
+      const lineY = startY + logoH + 4;
+      doc.setDrawColor(30, 58, 95);
+      doc.setLineWidth(0.8);
+      doc.line(10, lineY, W - 10, lineY);
+      doc.setLineWidth(0.2); // reset
+      doc.setTextColor(0, 0, 0);
+
+      return lineY + 6; // kembalikan posisi Y setelah header
+    }
+    function bukaModalPDF() {
+      document.getElementById('modal-pdf').classList.add('show');
+    }
+    function tutupModalPDF() {
+      document.getElementById('modal-pdf').classList.remove('show');
+    }
+
+    async function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const judul = document.getElementById('pdf-judul').value || 'Laporan Monitoring Listrik';
+      const filename = document.getElementById('pdf-filename').value || 'laporan-iot-listrik';
+      const sektorF = document.getElementById('pdf-sector').value;
+      const statusF = document.getElementById('pdf-status').value;
+      const incStats = document.getElementById('pdf-inc-stats').checked;
+      const incLog = document.getElementById('pdf-inc-log').checked;
+      const tanggal = new Date().toLocaleString('id-ID');
+      const W = doc.internal.pageSize.getWidth();
+
+      // ── Header institusi TVRI (halaman pertama) ──────────────────
+      const logoDataUrl = await getLogoBase64();
+      let curY = gambarHeaderTVRI(doc, W, logoDataUrl);
+
+      // ── Sub-header laporan ───────────────────────────────────────
+      doc.setFontSize(13); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 58, 95);
+      doc.text(judul, 14, curY);
+      doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
+      doc.text('Sistem Monitoring Mati Listrik — IoT Multi Sector', 14, curY + 5.5);
+      doc.text('Dicetak: ' + tanggal, W - 14, curY + 5.5, { align: 'right' });
+      doc.setTextColor(0, 0, 0);
+      curY += 13;
+
+      const filterLabel = [(sektorF || 'Semua sektor'), (statusF || 'Semua status')].join(' | ');
+      doc.setFontSize(9); doc.setTextColor(100, 100, 100);
+      doc.text('Filter: ' + filterLabel, 14, curY);
+      curY += 8;
+
+      // Tabel statistik
+      if (incStats && statsData.sectors) {
+        doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+        doc.text('Ringkasan Statistik per Sektor', 14, curY); curY += 4;
+        const rows = statsData.sectors
+          .filter(s => !sektorF || s.sector_id === sektorF)
+          .map(s => [namaSektor(s.sector_id), s.statusTerakhir ?? '-', String(s.totalKejadian), String(s.totalMati), formatDurasi(s.totalDurasiMati), s.waktuTerakhir ?? '-']);
+        doc.autoTable({
+          startY: curY,
+          head: [['Sektor', 'Status Terakhir', 'Total Kejadian', 'Total Mati', 'Total Durasi', 'Waktu Terakhir']],
+          body: rows, theme: 'grid',
+          headStyles: { fillColor: [30, 58, 95], textColor: 255, fontSize: 9, fontStyle: 'bold' },
+          bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [240, 244, 255] },
+          margin: { left: 14, right: 14 }
+        });
+        curY = doc.lastAutoTable.finalY + 10;
+      }
+
+      // Tabel log
+      if (incLog) {
+        let data = allData;
+        if (sektorF) data = data.filter(d => d.sector_id === sektorF);
+        if (statusF) data = data.filter(d => d.status === statusF);
+        doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+        doc.text('Log Detail Kejadian (' + data.length + ' data)', 14, curY); curY += 4;
+        if (!data.length) {
+          doc.setFontSize(9); doc.setFont(undefined, 'normal'); doc.setTextColor(150, 150, 150);
+          doc.text('Tidak ada data sesuai filter.', 14, curY + 6);
+        } else {
+          doc.autoTable({
+            startY: curY,
+            head: [['ID', 'Sektor', 'Waktu', 'Status', 'Tegangan', 'Durasi Mati', 'Diterima']],
+            body: data.map(r => ['#' + r.id, namaSektor(r.sector_id), r.waktu, r.status, r.tegangan != null ? r.tegangan + ' V' : '-', formatDurasiRow(r.durasi_mati), r.diterima_at]),
+            theme: 'striped',
+            headStyles: { fillColor: [30, 30, 30], textColor: 255, fontSize: 8, fontStyle: 'bold' },
+            bodyStyles: { fontSize: 8 }, margin: { left: 14, right: 14 }
+          });
+        }
+      }
+
+      // Footer nomor halaman
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8); doc.setTextColor(180, 180, 180);
+        doc.text('Halaman ' + i + ' dari ' + pageCount, W / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
+        doc.text('IoT Monitor — Sistem Mati Listrik', 14, doc.internal.pageSize.getHeight() - 6);
+      }
+
+      doc.save(filename + '.pdf');
+      tutupModalPDF();
+      showToast('PDF berhasil diunduh', 'success');
+    }
+
+    document.getElementById('modal-pdf').addEventListener('click', function (e) {
+      if (e.target === this) tutupModalPDF();
+    });
+
+    // ════════════════════════════════════════════════════
+    // TOAST
+    // ════════════════════════════════════════════════════
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = type; t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 3000);
+    }
+
+
+
+    // Format menit (float) → MM:SS
+    // Contoh: 0.516 → "00:31" | 65.3 → "01:05:18" | null/0 → "—"
+    function pad(n) { return String(Math.floor(n)).padStart(2, "0"); }
+
+    function formatDurasi(mnt) {
+      if (mnt == null || isNaN(mnt) || mnt <= 0) return "00:00";
+      const totalDetik = Math.round(parseFloat(mnt) * 60);
+      const jam = Math.floor(totalDetik / 3600);
+      const menit = Math.floor((totalDetik % 3600) / 60);
+      const detik = totalDetik % 60;
+      if (jam > 0) return pad(jam) + ":" + pad(menit) + ":" + pad(detik);
+      return pad(menit) + ":" + pad(detik);
+    }
+
+    function formatDurasiRow(mnt) {
+      if (mnt == null || isNaN(mnt) || mnt <= 0) return "—";
+      return formatDurasi(mnt);
+    }
+
+
+    // ════════════════════════════════════════════════════
+    // FETCH DATA GENSET
+    // ════════════════════════════════════════════════════
+    async function fetchGenset() {
+      try {
+        const [r1, r2] = await Promise.all([
+          fetch('/api/genset').then(r => r.json()),
+          fetch('/api/genset/stats').then(r => r.json())
+        ]);
+        gensetData = r1.data || [];
+        gensetStats = r2;
+
+        // Render otomatis jika panel genset aktif
+        const aktif = document.querySelector('.panel.active')?.id?.replace('panel-', '');
+        if (aktif === 'genset') renderGenset();
+      } catch (e) { }
+    }
+
+    // ════════════════════════════════════════════════════
+    // RENDER GENSET — Kartu status, nilai, grafik, tabel
+    // ════════════════════════════════════════════════════
+    function renderGenset() {
+      const gs = gensetStats;
+
+      // ── Kartu Status Genset ──
+      const stG = gs.statusGensetTerakhir ?? null;
+      const stP = gs.statusPlnTerakhir ?? null;
+
+      const cardGenset = document.getElementById('gcard-genset');
+      cardGenset.className = 'genset-card status-' + (stG === 'ON' ? 'on' : stG === 'OFF' ? 'off' : 'unknown');
+      document.getElementById('gval-status-genset').textContent = stG ?? '—';
+      document.getElementById('gval-status-genset').className = 'genset-card-value ' + (stG ? stG.toLowerCase() : '');
+      document.getElementById('gsub-genset').textContent = stG === 'ON' ? 'Genset sedang aktif' : stG === 'OFF' ? 'Genset tidak aktif' : 'Menunggu data...';
+
+      const cardPln = document.getElementById('gcard-pln');
+      cardPln.className = 'genset-card status-' + (stP === 'ON' ? 'on' : stP === 'OFF' ? 'off' : 'unknown');
+      document.getElementById('gval-status-pln').textContent = stP ?? '—';
+      document.getElementById('gval-status-pln').className = 'genset-card-value ' + (stP ? stP.toLowerCase() : '');
+      document.getElementById('gsub-pln').textContent = stP === 'ON' ? 'PLN menyala' : stP === 'OFF' ? 'PLN padam' : 'Menunggu data...';
+
+      document.getElementById('gval-total').textContent = gs.total ?? 0;
+      document.getElementById('gval-genset-on').textContent = gs.totalGensetOn ?? 0;
+      document.getElementById('gsub-waktu').textContent = gs.waktuTerakhir ? 'Update: ' + gs.waktuTerakhir : '—';
+
+      // ── Kartu Nilai Arus & Daya (data terbaru) ──
+      const latest = gensetData[0] ?? {};
+      const fNum = (v, d) => v != null ? Number(v).toFixed(d) : '—';
+
+      document.getElementById('gval-arus-r').innerHTML = fNum(latest.arus_r, 2) + '<span class="genset-val-unit">A</span>';
+      document.getElementById('gval-arus-s').innerHTML = fNum(latest.arus_s, 2) + '<span class="genset-val-unit">A</span>';
+      document.getElementById('gval-daya-r').innerHTML = fNum(latest.daya_r, 0) + '<span class="genset-val-unit">W</span>';
+      document.getElementById('gval-daya-s').innerHTML = fNum(latest.daya_s, 0) + '<span class="genset-val-unit">W</span>';
+
+      const totalDaya = gs.totalDayaTerakhir != null ? gs.totalDayaTerakhir + ' W' : '— W';
+      document.getElementById('gval-total-daya').textContent = totalDaya;
+
+      // ── Grafik ──
+      renderGensetGrafik();
+
+      // ── Tabel Log ──
+      const tbody = document.getElementById('tbody-genset');
+      if (!gensetData.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty">Menunggu data dari alat genset...</td></tr>';
+        return;
+      }
+      tbody.innerHTML = gensetData.map(r => `
+      <tr>
+        <td style="color:#bbb;font-size:11px">#${r.id}</td>
+        <td style="font-size:12px">${r.waktu}</td>
+        <td><span class="badge ${r.status_genset.toLowerCase()}"><span class="dot"></span>${r.status_genset}</span></td>
+        <td><span class="badge ${r.status_pln.toLowerCase()}"><span class="dot"></span>${r.status_pln}</span></td>
+        <td>${r.arus_r != null ? r.arus_r + ' A' : '—'}</td>
+        <td>${r.arus_s != null ? r.arus_s + ' A' : '—'}</td>
+        <td>${r.daya_r != null ? r.daya_r + ' W' : '—'}</td>
+        <td>${r.daya_s != null ? r.daya_s + ' W' : '—'}</td>
+        <td style="font-size:11px;color:#888">${r.diterima_at}</td>
+      </tr>`).join('');
+    }
+
+    // ════════════════════════════════════════════════════
+    // GRAFIK GENSET — Arus & Daya dari waktu ke waktu
+    // ════════════════════════════════════════════════════
+    function renderGensetGrafik() {
+      const limit = parseInt(document.getElementById('genset-chart-limit')?.value ?? 20);
+      const data = [...gensetData].slice(0, limit).reverse();
+
+      if (!data.length) return;
+
+      const labels = data.map(d => d.waktu.slice(11, 16)); // HH:MM
+
+      // ── Chart Arus ──
+      if (chartGensetArus) chartGensetArus.destroy();
+      chartGensetArus = new Chart(document.getElementById('chartGensetArus'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Arus R (A)',
+              data: data.map(d => d.arus_r ?? null),
+              borderColor: '#22C55E',
+              backgroundColor: 'rgba(34,197,94,0.1)',
+              tension: 0.3, fill: true, pointRadius: 3
+            },
+            {
+              label: 'Arus S (A)',
+              data: data.map(d => d.arus_s ?? null),
+              borderColor: '#3B82F6',
+              backgroundColor: 'rgba(59,130,246,0.1)',
+              tension: 0.3, fill: true, pointRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: true, position: 'top', labels: { color: '#9CA3AF' } } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255,255,255,0.06)' },
+              ticks: { callback: v => v + ' A', color: '#9CA3AF' }
+            },
+            x: { ticks: { maxTicksLimit: 12, font: { size: 10 }, color: '#6B7280' }, grid: { display: false } }
+          }
+        }
+      });
+
+      // ── Chart Daya ──
+      if (chartGensetDaya) chartGensetDaya.destroy();
+      chartGensetDaya = new Chart(document.getElementById('chartGensetDaya'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Daya R (W)',
+              data: data.map(d => d.daya_r ?? null),
+              borderColor: '#22C55E',
+              backgroundColor: 'rgba(34,197,94,0.1)',
+              tension: 0.3, fill: true, pointRadius: 3
+            },
+            {
+              label: 'Daya S (W)',
+              data: data.map(d => d.daya_s ?? null),
+              borderColor: '#EF4444',
+              backgroundColor: 'rgba(239,68,68,0.1)',
+              tension: 0.3, fill: true, pointRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: true, position: 'top', labels: { color: '#9CA3AF' } } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255,255,255,0.06)' },
+              ticks: { callback: v => v + ' W', color: '#9CA3AF' }
+            },
+            x: { ticks: { maxTicksLimit: 12, font: { size: 10 }, color: '#6B7280' }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // ════════════════════════════════════════════════════
+    // HAPUS DATA GENSET
+    // ════════════════════════════════════════════════════
+    async function hapusDataGenset() {
+      if (!confirm('Hapus semua data genset yang tersimpan di server?')) return;
+      await fetch('/api/genset', { method: 'DELETE' });
+      showToast('Data genset dihapus', 'success');
+      fetchGenset();
+    }
+
+    // ════════════════════════════════════════════════════
+    // MODAL PDF GENSET
+    // ════════════════════════════════════════════════════
+    function bukaModalPDFGenset() {
+      document.getElementById('modal-pdf-genset').classList.add('show');
+    }
+    function tutupModalPDFGenset() {
+      document.getElementById('modal-pdf-genset').classList.remove('show');
+    }
+
+    // ════════════════════════════════════════════════════
+    // EXPORT PDF GENSET
+    // ════════════════════════════════════════════════════
+    async function exportPDFGenset() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const judul = document.getElementById('gpdf-judul').value || 'Laporan Monitoring Genset';
+      const filename = document.getElementById('gpdf-filename').value || 'laporan-genset';
+      const incStats = document.getElementById('gpdf-inc-stats').checked;
+      const incLog = document.getElementById('gpdf-inc-log').checked;
+      const tanggal = new Date().toLocaleString('id-ID');
+      const W = doc.internal.pageSize.getWidth();
+
+      // ── Header institusi TVRI (halaman pertama) ──────────────────
+      const logoDataUrl = await getLogoBase64();
+      let curY = gambarHeaderTVRI(doc, W, logoDataUrl);
+
+      // ── Sub-header laporan ───────────────────────────────────────
+      doc.setFontSize(13); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 58, 95);
+      doc.text(judul, 14, curY);
+      doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
+      doc.text('Sistem Monitoring Genset — IoT TVRI', 14, curY + 5.5);
+      doc.text('Dicetak: ' + tanggal, W - 14, curY + 5.5, { align: 'right' });
+      doc.setTextColor(0, 0, 0);
+      curY += 13;
+
+      // Tabel statistik ringkas
+      if (incStats && gensetStats.total != null) {
+        doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+        doc.text('Ringkasan Statistik Genset', 14, curY); curY += 4;
+
+        const latest = gensetData[0] ?? {};
+        const statsRows = [
+          ['Total data diterima', String(gensetStats.total ?? 0)],
+          ['Status Genset terakhir', gensetStats.statusGensetTerakhir ?? '—'],
+          ['Status PLN terakhir', gensetStats.statusPlnTerakhir ?? '—'],
+          ['Total kali Genset ON', String(gensetStats.totalGensetOn ?? 0)],
+          ['Arus R terakhir', latest.arus_r != null ? latest.arus_r + ' A' : '—'],
+          ['Arus S terakhir', latest.arus_s != null ? latest.arus_s + ' A' : '—'],
+          ['Daya R terakhir', latest.daya_r != null ? latest.daya_r + ' W' : '—'],
+          ['Daya S terakhir', latest.daya_s != null ? latest.daya_s + ' W' : '—'],
+          ['Total daya terakhir', gensetStats.totalDayaTerakhir != null ? gensetStats.totalDayaTerakhir + ' W' : '—'],
+          ['Rata-rata Arus R', gensetStats.avgArusR != null ? gensetStats.avgArusR + ' A' : '—'],
+          ['Rata-rata Arus S', gensetStats.avgArusS != null ? gensetStats.avgArusS + ' A' : '—'],
+          ['Waktu data terakhir', gensetStats.waktuTerakhir ?? '—']
+        ];
+        doc.autoTable({
+          startY: curY,
+          head: [['Parameter', 'Nilai']],
+          body: statsRows,
+          theme: 'grid',
+          headStyles: { fillColor: [30, 58, 95], textColor: 255, fontSize: 9, fontStyle: 'bold' },
+          bodyStyles: { fontSize: 9 },
+          alternateRowStyles: { fillColor: [240, 244, 255] },
+          columnStyles: { 0: { fontStyle: 'bold', cellWidth: 70 } },
+          margin: { left: 14, right: 14 }
+        });
+        curY = doc.lastAutoTable.finalY + 10;
+      }
+
+      // Tabel log detail
+      if (incLog && gensetData.length) {
+        doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+        doc.text('Log Detail Data Genset (' + gensetData.length + ' data)', 14, curY); curY += 4;
+        doc.autoTable({
+          startY: curY,
+          head: [['ID', 'Waktu', 'Genset', 'PLN', 'Arus R', 'Arus S', 'Daya R', 'Daya S', 'Diterima']],
+          body: gensetData.map(r => [
+            '#' + r.id,
+            r.waktu,
+            r.status_genset,
+            r.status_pln,
+            r.arus_r != null ? r.arus_r + ' A' : '—',
+            r.arus_s != null ? r.arus_s + ' A' : '—',
+            r.daya_r != null ? r.daya_r + ' W' : '—',
+            r.daya_s != null ? r.daya_s + ' W' : '—',
+            r.diterima_at
+          ]),
+          theme: 'striped',
+          headStyles: { fillColor: [30, 30, 30], textColor: 255, fontSize: 8, fontStyle: 'bold' },
+          bodyStyles: { fontSize: 8 },
+          margin: { left: 14, right: 14 }
+        });
+      } else if (incLog) {
+        doc.setFontSize(9); doc.setFont(undefined, 'normal'); doc.setTextColor(150, 150, 150);
+        doc.text('Belum ada data genset.', 14, curY + 6);
+      }
+
+      // Footer nomor halaman
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8); doc.setTextColor(180, 180, 180);
+        doc.text('Halaman ' + i + ' dari ' + pageCount, W / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
+        doc.text('IoT Monitor — Sistem Genset TVRI', 14, doc.internal.pageSize.getHeight() - 6);
+      }
+
+      doc.save(filename + '.pdf');
+      tutupModalPDFGenset();
+      showToast('PDF Genset berhasil diunduh', 'success');
+    }
+
+    // Tutup modal genset jika klik di luar
+    document.getElementById('modal-pdf-genset').addEventListener('click', function (e) {
+      if (e.target === this) tutupModalPDFGenset();
+    });
+
+    // ════════════════════════════════════════════════════
+    // INIT — Fetch pertama & interval 3 detik
+    // ════════════════════════════════════════════════════
+    fetchData();
+    fetchGenset();
+    setInterval(async () => {
+      // Simpan posisi scroll sebelum update otomatis
+      const scrollY = window.scrollY;
+      await Promise.all([fetchData(), fetchGenset()]);
+      // Pulihkan posisi scroll setelah render selesai
+      window.scrollTo({ top: scrollY, behavior: 'instant' });
+    }, 3000);
+  </script>
+</body>
+
+</html>
