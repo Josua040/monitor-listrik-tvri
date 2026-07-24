@@ -18,7 +18,13 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0A0A0A;
+      background-color: #0A0A0A;
+      background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(13,27,42,0.85) 0%, transparent 65%),
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: auto, 40px 40px, 40px 40px;
+      background-attachment: fixed;
       color: #F9FAFB;
     }
 
@@ -71,7 +77,6 @@
       padding: 20px 16px;
     }
 
-    /* Nav tabs */
     .nav {
       display: flex;
       gap: 4px;
@@ -106,7 +111,6 @@
       color: #000;
     }
 
-    /* Panel */
     .panel {
       display: none;
     }
@@ -115,7 +119,6 @@
       display: block;
     }
 
-    /* Sector cards */
     .sector-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -142,6 +145,31 @@
 
     .sector-card.status-off {
       border-top-color: #EF4444;
+    }
+
+    .sector-card.status-no-signal {
+      border-top-color: #F59E0B;
+    }
+
+    .sc-badge.no-signal {
+      background: rgba(245, 158, 11, 0.15);
+      color: #F59E0B;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sc-no-signal-info {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: #F59E0B;
+      margin-top: 8px;
+      padding: 5px 8px;
+      background: rgba(245, 158, 11, 0.08);
+      border-radius: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.2);
     }
 
     .sc-header {
@@ -200,11 +228,46 @@
       margin-bottom: 2px;
     }
 
+
     .sc-stat-value {
       font-size: 14px;
       font-weight: 600;
       color: #F9FAFB;
     }
+
+    .sc-stat-value.undervoltage { color: #F59E0B; }
+    .sc-stat-value.overvoltage  { color: #EF4444; }
+
+    .voltage-badge {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 3px;
+      display: inline-block;
+    }
+
+    .voltage-badge.undervoltage {
+      background: rgba(245, 158, 11, 0.15);
+      color: #F59E0B;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .voltage-badge.overvoltage {
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .teg-warn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .teg-warn.undervoltage { color: #F59E0B; }
+    .teg-warn.overvoltage  { color: #EF4444; }
 
     .sc-time {
       font-size: 10px;
@@ -212,7 +275,7 @@
       margin-top: 8px;
     }
 
-    /* Summary bar */
+
     .summary-bar {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -247,7 +310,6 @@
       color: #22C55E;
     }
 
-    /* Section */
     .section {
       background: #111827;
       border-radius: 10px;
@@ -268,7 +330,6 @@
       gap: 8px;
     }
 
-    /* Filter bar */
     .filter-bar {
       display: flex;
       align-items: center;
@@ -297,7 +358,6 @@
       gap: 8px;
     }
 
-    /* Buttons */
     .btn {
       font-size: 13px;
       padding: 7px 14px;
@@ -339,7 +399,6 @@
       background: rgba(239, 68, 68, 0.25);
     }
 
-    /* ── Lucide Icons ─────────────────────────────── */
     .icon {
       width: 16px;
       height: 16px;
@@ -374,7 +433,6 @@
       margin-right: 6px;
     }
 
-    /* icon dalam kartu genset */
     .genset-card-icon svg {
       width: 28px;
       height: 28px;
@@ -402,7 +460,6 @@
       border-color: #2563EB;
     }
 
-    /* Table */
     .table-wrap {
       overflow-x: auto;
     }
@@ -485,7 +542,6 @@
       font-size: 13px;
     }
 
-    /* Chart */
     .chart-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -526,7 +582,6 @@
       color: #9CA3AF;
     }
 
-    /* Riwayat tabs */
     .sub-tabs {
       display: flex;
       gap: 4px;
@@ -550,7 +605,6 @@
       border-color: #22C55E;
     }
 
-    /* Modal */
     .modal-backdrop {
       display: none;
       position: fixed;
@@ -639,7 +693,6 @@
       accent-color: #22C55E;
     }
 
-    /* ── Genset: Kartu status besar ─────────────────── */
     .genset-status-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -706,7 +759,6 @@
       margin-top: 4px;
     }
 
-    /* ── Genset: Grid nilai (arus & daya) ─────────────── */
     .genset-val-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -745,7 +797,6 @@
       margin-left: 2px;
     }
 
-    /* ── Genset: Total daya highlight ─────────────────── */
     .genset-total-daya {
       background: linear-gradient(135deg, #0D1B2A 0%, #1E3A5F 50%, #166534 100%);
       border: 1px solid #1E2D3D;
@@ -769,7 +820,6 @@
       color: #22C55E;
     }
 
-    /* Toast */
     #toast {
       display: none;
       position: fixed;
@@ -812,7 +862,6 @@
 
   <div class="container">
 
-    <!-- Nav -->
     <div class="nav">
       <button class="nav-btn active" onclick="switchNav('dashboard')" id="nav-dashboard">Dashboard</button>
       <button class="nav-btn" onclick="switchNav('grafik')" id="nav-grafik">Grafik</button>
@@ -831,7 +880,7 @@
     <!-- ═══════════════════════════════════════════ -->
     <div class="panel active" id="panel-dashboard">
 
-      <!-- Summary bar -->
+
       <div class="summary-bar">
         <div class="sum-card">
           <div class="sum-label">Total kejadian</div>
@@ -851,10 +900,10 @@
         </div>
       </div>
 
-      <!-- Sector cards -->
+
       <div class="sector-grid" id="sector-grid"></div>
 
-      <!-- Tabel terbaru -->
+
       <div class="section">
         <div class="section-title">
           Kejadian terbaru
@@ -1305,12 +1354,8 @@
   </div>
 
   <script>
-    // ════════════════════════════════════════════════════
-    // STATE
-    // ════════════════════════════════════════════════════
     const SECTORS = ['sector_1', 'sector_2', 'sector_3', 'sector_4', 'sector_5'];
 
-    // Mapping ID sektor ke nama tampilan (nama lokasi transmisi TVRI)
     const SECTOR_NAMES = {
       sector_1: 'Transmisi Manado',
       sector_2: 'Transmisi Makawemben',
@@ -1319,25 +1364,16 @@
       sector_5: 'Transmisi Tahuna'
     };
 
-    // Helper: kembalikan nama tampilan sektor; fallback ke sector_id jika tidak ada
     function namaSektor(id) {
       return SECTOR_NAMES[id] ?? id;
     }
-    let allData = [];
-    let statsData = {};
-    let riwayatMode = 'hari';
-    let chartTeg, chartMati, chartDurasi, chartRiwayat;
 
-    // State genset
-    let gensetData = [];
-    let gensetStats = {};
+    let allData = [], statsData = {}, riwayatMode = 'hari';
+    let chartTeg, chartMati, chartDurasi, chartRiwayat;
+    let gensetData = [], gensetStats = {};
     let chartGensetArus, chartGensetDaya;
 
-    // ════════════════════════════════════════════════════
-    // NAV
-    // ════════════════════════════════════════════════════
     function switchNav(name) {
-      // Semua panel termasuk genset
       ['dashboard', 'grafik', 'riwayat', 'log', 'genset'].forEach(p => {
         document.getElementById('panel-' + p).classList.toggle('active', p === name);
         document.getElementById('nav-' + p).classList.toggle('active', p === name);
@@ -1360,9 +1396,6 @@
       renderRiwayat();
     }
 
-    // ════════════════════════════════════════════════════
-    // FETCH DATA
-    // ════════════════════════════════════════════════════
     async function fetchData() {
       try {
         const [r1, r2] = await Promise.all([
@@ -1371,11 +1404,8 @@
         ]);
         allData = r1.data || [];
         statsData = r2;
-
         renderDashboard();
         document.getElementById('last-update').textContent = 'Update: ' + new Date().toLocaleTimeString('id-ID');
-
-        // Update panel aktif
         const aktif = document.querySelector('.panel.active')?.id?.replace('panel-', '');
         if (aktif === 'grafik') renderGrafik();
         if (aktif === 'riwayat') renderRiwayat();
@@ -1383,40 +1413,67 @@
       } catch (e) { }
     }
 
-    // ════════════════════════════════════════════════════
-    // DASHBOARD
-    // ════════════════════════════════════════════════════
     function renderDashboard() {
       const sektors = statsData.sectors || [];
 
-      // Summary bar
-      const totalOff = sektors.filter(s => s.statusTerakhir === 'OFF').length;
-      const totalOn = sektors.filter(s => s.statusTerakhir === 'ON').length;
+      // OFF + NO SIGNAL keduanya dihitung sebagai "sektor mati"
+      const totalOff = sektors.filter(s => s.statusTerakhir === 'OFF' || s.isOnline === false).length;
+      const totalOn = sektors.filter(s => s.isOnline !== false && s.statusTerakhir === 'ON').length;
       const totalDurasi = sektors.reduce((s, d) => s + d.totalDurasiMati, 0);
       document.getElementById('sum-total').textContent = statsData.globalTotal || 0;
       document.getElementById('sum-off').textContent = totalOff;
       document.getElementById('sum-on').textContent = totalOn;
       document.getElementById('sum-durasi').textContent = formatDurasi(totalDurasi);
 
-      // Sector cards
       const grid = document.getElementById('sector-grid');
       grid.innerHTML = sektors.map(s => {
-        const st = s.statusTerakhir;
-        const stClass = st === 'ON' ? 'on' : st === 'OFF' ? 'off' : 'unknown';
-        const stLabel = st ?? '—';
-        // Ambil tegangan terakhir
+        const noSignal = s.isOnline === false;
+        const st = noSignal ? 'no-signal' : (s.statusTerakhir ?? 'unknown');
+        const stClass = st === 'ON' ? 'on' : st === 'OFF' ? 'off' : st === 'no-signal' ? 'no-signal' : 'unknown';
+
+        let badgeHtml;
+        if (noSignal) {
+          badgeHtml = `<span class="sc-badge no-signal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="2" x2="22" y2="22"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 4.17-2.65"/><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"/><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"/><path d="M5 13a10 10 0 0 1 5.24-2.76"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            NO SIGNAL
+          </span>`;
+        } else {
+          badgeHtml = `<span class="sc-badge ${stClass}">${s.statusTerakhir ?? '—'}</span>`;
+        }
+
         const lastRecord = allData.find(d => d.sector_id === s.sector_id);
-        const tegTerakhir = lastRecord?.tegangan != null ? lastRecord.tegangan + ' V' : '—';
+        const tegVal = s.lastTegangan != null ? s.lastTegangan : lastRecord?.tegangan;
+        const tegTerakhir = tegVal != null ? tegVal + ' V' : '—';
+
+        // Anomali tegangan hanya relevan saat ON dan tidak NO SIGNAL
+        const isOn = !noSignal && s.statusTerakhir === 'ON';
+        const tegClass = (isOn && tegVal != null)
+          ? (tegVal < 210 ? 'undervoltage' : tegVal > 250 ? 'overvoltage' : '')
+          : '';
+        const tegBadgeHtml = tegClass === 'undervoltage'
+          ? '<span class="voltage-badge undervoltage">TEGANGAN RENDAH</span>'
+          : tegClass === 'overvoltage'
+          ? '<span class="voltage-badge overvoltage">TEGANGAN TINGGI</span>'
+          : '';
+
+        const noSignalInfoHtml = noSignal && s.last_seen != null
+          ? `<div class="sc-no-signal-info">
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Terakhir aktif: ${formatWaktuLalu(s.last_seen)}${s.last_status ? ' (' + s.last_status + ')' : ''}
+            </div>`
+          : '';
+
         return `
         <div class="sector-card status-${stClass}">
           <div class="sc-header">
             <div class="sc-name">${namaSektor(s.sector_id)}</div>
-            <span class="sc-badge ${stClass}">${stLabel}</span>
+            ${badgeHtml}
           </div>
           <div class="sc-stats">
             <div class="sc-stat">
               <div class="sc-stat-label">Tegangan</div>
-              <div class="sc-stat-value">${tegTerakhir}</div>
+              <div class="sc-stat-value ${tegClass}">${tegTerakhir}</div>
+              ${tegBadgeHtml}
             </div>
             <div class="sc-stat">
               <div class="sc-stat-label">Total mati</div>
@@ -1431,29 +1488,37 @@
               <div class="sc-stat-value">${s.totalKejadian}</div>
             </div>
           </div>
-          <div class="sc-time">${s.waktuTerakhir ?? 'Belum ada data'}</div>
+          <div class="sc-time">${noSignal ? (s.last_seen ?? 'Belum ada data') : (s.waktuTerakhir ?? 'Belum ada data')}</div>
+          ${noSignalInfoHtml}
         </div>`;
       }).join('');
 
-      // Tabel recent (10 terbaru)
       const tbody = document.getElementById('tbody-recent');
       if (!allData.length) {
         tbody.innerHTML = '<tr><td colspan="5" class="empty">Menunggu data dari ESP32...</td></tr>';
         return;
       }
-      tbody.innerHTML = allData.slice(0, 10).map(r => `
+      tbody.innerHTML = allData.slice(0, 10).map(r => {
+        const teg = r.tegangan;
+        const warnOn = r.status === 'ON' && teg != null;
+        const warnClass = warnOn ? (teg < 210 ? 'undervoltage' : teg > 250 ? 'overvoltage' : '') : '';
+        const warnIcon = warnClass
+          ? `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+          : '';
+        const tegHtml = teg != null
+          ? `<span class="teg-warn ${warnClass}">${warnIcon}${teg} V</span>`
+          : '—';
+        return `
       <tr>
         <td><span class="sector-pill">${namaSektor(r.sector_id)}</span></td>
         <td style="font-size:12px">${r.waktu}</td>
         <td><span class="badge ${r.status.toLowerCase()}"><span class="dot"></span>${r.status}</span></td>
-        <td>${r.tegangan != null ? r.tegangan + ' V' : '—'}</td>
+        <td>${tegHtml}</td>
         <td>${formatDurasiRow(r.durasi_mati)}</td>
-      </tr>`).join('');
+      </tr>`;
+      }).join('');
     }
 
-    // ════════════════════════════════════════════════════
-    // GRAFIK
-    // ════════════════════════════════════════════════════
     function renderGrafik() {
       const sektorF = document.getElementById('chart-sector-filter').value;
       const limit = parseInt(document.getElementById('chart-limit').value);
@@ -1462,7 +1527,6 @@
       if (sektorF) data = data.filter(d => d.sector_id === sektorF);
       data = data.slice(0, limit).reverse();
 
-      // Chart tegangan (line)
       const labels = data.map(d => d.waktu.slice(11, 16) + ' ' + namaSektor(d.sector_id).replace('Transmisi ', 'T.'));
       const tegValues = data.map(d => d.tegangan ?? 0);
 
@@ -1495,7 +1559,6 @@
         }
       });
 
-      // Chart mati per sektor (bar)
       const sektors = statsData.sectors || [];
       const matiVals = sektors.map(s => s.totalMati);
       const durasiVals = sektors.map(s => s.totalDurasiMati);
@@ -1538,9 +1601,6 @@
       });
     }
 
-    // ════════════════════════════════════════════════════
-    // RIWAYAT
-    // ════════════════════════════════════════════════════
     function getPeriodeKey(waktu, mode) {
       if (!waktu) return '—';
       const d = new Date(waktu.replace(' ', 'T'));
@@ -1548,7 +1608,6 @@
       if (mode === 'hari') return waktu.slice(0, 10);
       if (mode === 'bulan') return waktu.slice(0, 7);
       if (mode === 'minggu') {
-        // Minggu ke-N tahun ini
         const start = new Date(d.getFullYear(), 0, 1);
         const week = Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7);
         return d.getFullYear() + '-W' + String(week).padStart(2, '0');
@@ -1561,7 +1620,6 @@
       let data = allData;
       if (sektorF) data = data.filter(d => d.sector_id === sektorF);
 
-      // Group by periode
       const groups = {};
       data.forEach(r => {
         const key = getPeriodeKey(r.waktu, riwayatMode);
@@ -1574,7 +1632,6 @@
 
       const sorted = Object.keys(groups).sort().reverse();
 
-      // Chart riwayat
       const rLabels = [...sorted].reverse();
       const rMati = rLabels.map(k => groups[k].mati);
       const rDurasi = rLabels.map(k => groups[k].durasi);
@@ -1599,7 +1656,6 @@
         }
       });
 
-      // Tabel riwayat
       const tbody = document.getElementById('tbody-riwayat');
       if (!sorted.length) {
         tbody.innerHTML = '<tr><td colspan="5" class="empty">Belum ada data</td></tr>';
@@ -1618,9 +1674,6 @@
       }).join('');
     }
 
-    // ════════════════════════════════════════════════════
-    // LOG
-    // ════════════════════════════════════════════════════
     function renderLog() {
       const sF = document.getElementById('filter-sector').value;
       const stF = document.getElementById('filter-status').value;
@@ -1633,16 +1686,27 @@
         tbody.innerHTML = '<tr><td colspan="7" class="empty">Tidak ada data sesuai filter</td></tr>';
         return;
       }
-      tbody.innerHTML = data.map(r => `
+      tbody.innerHTML = data.map(r => {
+        const teg = r.tegangan;
+        const warnOn = r.status === 'ON' && teg != null;
+        const warnClass = warnOn ? (teg < 210 ? 'undervoltage' : teg > 250 ? 'overvoltage' : '') : '';
+        const warnIcon = warnClass
+          ? `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+          : '';
+        const tegHtml = teg != null
+          ? `<span class="teg-warn ${warnClass}">${warnIcon}${teg} V</span>`
+          : '—';
+        return `
       <tr>
         <td style="color:#bbb;font-size:11px">#${r.id}</td>
         <td><span class="sector-pill">${namaSektor(r.sector_id)}</span></td>
         <td style="font-size:12px">${r.waktu}</td>
         <td><span class="badge ${r.status.toLowerCase()}"><span class="dot"></span>${r.status}</span></td>
-        <td>${r.tegangan != null ? r.tegangan + ' V' : '—'}</td>
+        <td>${tegHtml}</td>
         <td>${formatDurasiRow(r.durasi_mati)}</td>
         <td style="font-size:11px;color:#888">${r.diterima_at}</td>
-      </tr>`).join('');
+      </tr>`;
+      }).join('');
     }
 
     async function hapusSemua() {
@@ -1652,17 +1716,9 @@
       fetchData();
     }
 
-    // ════════════════════════════════════════════════════
-    // EXPORT PDF
-    // ════════════════════════════════════════════════════
 
-    // Cache base64 logo agar tidak di-fetch ulang setiap kali export
     let _logoBase64Cache = null;
 
-    /**
-     * getLogoBase64() — Muat logo TVRI dari server dan kembalikan sebagai data URL.
-     * Hasil di-cache agar fetch hanya terjadi sekali.
-     */
     async function getLogoBase64() {
       if (_logoBase64Cache) return _logoBase64Cache;
       try {
@@ -1680,25 +1736,16 @@
       }
     }
 
-    /**
-     * gambarHeaderTVRI() — Gambar header institusi TVRI di halaman pertama PDF.
-     * @param {jsPDF} doc  - instance jsPDF
-     * @param {number} W   - lebar halaman (mm)
-     * @param {string|null} logoDataUrl - base64 data URL logo, atau null jika gagal dimuat
-     * @returns {number} curY - posisi Y setelah header (siap untuk konten berikutnya)
-     */
     function gambarHeaderTVRI(doc, W, logoDataUrl) {
-      const logoH = 18;   // tinggi logo dalam mm
-      const logoW = 18;   // lebar logo (akan disesuaikan aspek rasio)
+      const logoH = 18;
+      const logoW = 18;
       const startY = 8;
       const textX = 14 + (logoDataUrl ? logoW + 4 : 0);
 
-      // Gambar logo jika berhasil dimuat
       if (logoDataUrl) {
         doc.addImage(logoDataUrl, 'JPEG', 10, startY, logoW, logoH);
       }
 
-      // Teks institusi di sisi kanan logo
       doc.setTextColor(30, 58, 95);
       doc.setFontSize(9); doc.setFont(undefined, 'bold');
       doc.text(
@@ -1711,15 +1758,14 @@
       doc.text('JL. TELEVISI, BANJER-TIKALA MANADO, SULAWESI UTARA 95125 INDONESIA', textX, startY + 15);
       doc.text('P (0431) 868001   F (0431) 860403   WWW.TVRI.GO.ID', textX, startY + 19.5);
 
-      // Garis pemisah tebal navy
       const lineY = startY + logoH + 4;
       doc.setDrawColor(30, 58, 95);
       doc.setLineWidth(0.8);
       doc.line(10, lineY, W - 10, lineY);
-      doc.setLineWidth(0.2); // reset
+      doc.setLineWidth(0.2);
       doc.setTextColor(0, 0, 0);
 
-      return lineY + 6; // kembalikan posisi Y setelah header
+      return lineY + 6;
     }
     function bukaModalPDF() {
       document.getElementById('modal-pdf').classList.add('show');
@@ -1740,11 +1786,9 @@
       const tanggal = new Date().toLocaleString('id-ID');
       const W = doc.internal.pageSize.getWidth();
 
-      // ── Header institusi TVRI (halaman pertama) ──────────────────
       const logoDataUrl = await getLogoBase64();
       let curY = gambarHeaderTVRI(doc, W, logoDataUrl);
 
-      // ── Sub-header laporan ───────────────────────────────────────
       doc.setFontSize(13); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 58, 95);
       doc.text(judul, 14, curY);
       doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
@@ -1758,7 +1802,6 @@
       doc.text('Filter: ' + filterLabel, 14, curY);
       curY += 8;
 
-      // Tabel statistik
       if (incStats && statsData.sectors) {
         doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
         doc.text('Ringkasan Statistik per Sektor', 14, curY); curY += 4;
@@ -1776,7 +1819,6 @@
         curY = doc.lastAutoTable.finalY + 10;
       }
 
-      // Tabel log
       if (incLog) {
         let data = allData;
         if (sektorF) data = data.filter(d => d.sector_id === sektorF);
@@ -1798,7 +1840,6 @@
         }
       }
 
-      // Footer nomor halaman
       const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -1816,9 +1857,6 @@
       if (e.target === this) tutupModalPDF();
     });
 
-    // ════════════════════════════════════════════════════
-    // TOAST
-    // ════════════════════════════════════════════════════
     function showToast(msg, type) {
       const t = document.getElementById('toast');
       t.textContent = msg; t.className = type; t.style.display = 'block';
@@ -1827,8 +1865,6 @@
 
 
 
-    // Format menit (float) → MM:SS
-    // Contoh: 0.516 → "00:31" | 65.3 → "01:05:18" | null/0 → "—"
     function pad(n) { return String(Math.floor(n)).padStart(2, "0"); }
 
     function formatDurasi(mnt) {
@@ -1846,10 +1882,21 @@
       return formatDurasi(mnt);
     }
 
+    function formatWaktuLalu(lastSeenUtc) {
+      if (!lastSeenUtc) return 'tidak diketahui';
+      const ms = Date.now() - new Date(lastSeenUtc.replace(' ', 'T') + 'Z').getTime();
+      if (ms < 0) return 'baru saja';
+      const detik = Math.floor(ms / 1000);
+      if (detik < 60)  return detik + ' detik lalu';
+      const menit = Math.floor(ms / 60000);
+      if (menit < 60)  return menit + ' menit lalu';
+      const jam = Math.floor(ms / 3600000);
+      if (jam < 24)    return jam + ' jam lalu';
+      const hari = Math.floor(ms / 86400000);
+      return hari + ' hari lalu';
+    }
 
-    // ════════════════════════════════════════════════════
-    // FETCH DATA GENSET
-    // ════════════════════════════════════════════════════
+
     async function fetchGenset() {
       try {
         const [r1, r2] = await Promise.all([
@@ -1859,19 +1906,14 @@
         gensetData = r1.data || [];
         gensetStats = r2;
 
-        // Render otomatis jika panel genset aktif
         const aktif = document.querySelector('.panel.active')?.id?.replace('panel-', '');
         if (aktif === 'genset') renderGenset();
       } catch (e) { }
     }
 
-    // ════════════════════════════════════════════════════
-    // RENDER GENSET — Kartu status, nilai, grafik, tabel
-    // ════════════════════════════════════════════════════
     function renderGenset() {
       const gs = gensetStats;
 
-      // ── Kartu Status Genset ──
       const stG = gs.statusGensetTerakhir ?? null;
       const stP = gs.statusPlnTerakhir ?? null;
 
@@ -1891,7 +1933,6 @@
       document.getElementById('gval-genset-on').textContent = gs.totalGensetOn ?? 0;
       document.getElementById('gsub-waktu').textContent = gs.waktuTerakhir ? 'Update: ' + gs.waktuTerakhir : '—';
 
-      // ── Kartu Nilai Arus & Daya (data terbaru) ──
       const latest = gensetData[0] ?? {};
       const fNum = (v, d) => v != null ? Number(v).toFixed(d) : '—';
 
@@ -1903,10 +1944,8 @@
       const totalDaya = gs.totalDayaTerakhir != null ? gs.totalDayaTerakhir + ' W' : '— W';
       document.getElementById('gval-total-daya').textContent = totalDaya;
 
-      // ── Grafik ──
       renderGensetGrafik();
 
-      // ── Tabel Log ──
       const tbody = document.getElementById('tbody-genset');
       if (!gensetData.length) {
         tbody.innerHTML = '<tr><td colspan="9" class="empty">Menunggu data dari alat genset...</td></tr>';
@@ -1926,9 +1965,6 @@
       </tr>`).join('');
     }
 
-    // ════════════════════════════════════════════════════
-    // GRAFIK GENSET — Arus & Daya dari waktu ke waktu
-    // ════════════════════════════════════════════════════
     function renderGensetGrafik() {
       const limit = parseInt(document.getElementById('genset-chart-limit')?.value ?? 20);
       const data = [...gensetData].slice(0, limit).reverse();
@@ -1937,7 +1973,6 @@
 
       const labels = data.map(d => d.waktu.slice(11, 16)); // HH:MM
 
-      // ── Chart Arus ──
       if (chartGensetArus) chartGensetArus.destroy();
       chartGensetArus = new Chart(document.getElementById('chartGensetArus'), {
         type: 'line',
@@ -1974,7 +2009,6 @@
         }
       });
 
-      // ── Chart Daya ──
       if (chartGensetDaya) chartGensetDaya.destroy();
       chartGensetDaya = new Chart(document.getElementById('chartGensetDaya'), {
         type: 'line',
@@ -2012,9 +2046,6 @@
       });
     }
 
-    // ════════════════════════════════════════════════════
-    // HAPUS DATA GENSET
-    // ════════════════════════════════════════════════════
     async function hapusDataGenset() {
       if (!confirm('Hapus semua data genset yang tersimpan di server?')) return;
       await fetch('/api/genset', { method: 'DELETE' });
@@ -2022,9 +2053,6 @@
       fetchGenset();
     }
 
-    // ════════════════════════════════════════════════════
-    // MODAL PDF GENSET
-    // ════════════════════════════════════════════════════
     function bukaModalPDFGenset() {
       document.getElementById('modal-pdf-genset').classList.add('show');
     }
@@ -2032,9 +2060,6 @@
       document.getElementById('modal-pdf-genset').classList.remove('show');
     }
 
-    // ════════════════════════════════════════════════════
-    // EXPORT PDF GENSET
-    // ════════════════════════════════════════════════════
     async function exportPDFGenset() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -2045,11 +2070,9 @@
       const tanggal = new Date().toLocaleString('id-ID');
       const W = doc.internal.pageSize.getWidth();
 
-      // ── Header institusi TVRI (halaman pertama) ──────────────────
       const logoDataUrl = await getLogoBase64();
       let curY = gambarHeaderTVRI(doc, W, logoDataUrl);
 
-      // ── Sub-header laporan ───────────────────────────────────────
       doc.setFontSize(13); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 58, 95);
       doc.text(judul, 14, curY);
       doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
@@ -2058,7 +2081,6 @@
       doc.setTextColor(0, 0, 0);
       curY += 13;
 
-      // Tabel statistik ringkas
       if (incStats && gensetStats.total != null) {
         doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
         doc.text('Ringkasan Statistik Genset', 14, curY); curY += 4;
@@ -2092,7 +2114,6 @@
         curY = doc.lastAutoTable.finalY + 10;
       }
 
-      // Tabel log detail
       if (incLog && gensetData.length) {
         doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
         doc.text('Log Detail Data Genset (' + gensetData.length + ' data)', 14, curY); curY += 4;
@@ -2120,7 +2141,6 @@
         doc.text('Belum ada data genset.', 14, curY + 6);
       }
 
-      // Footer nomor halaman
       const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
@@ -2134,21 +2154,15 @@
       showToast('PDF Genset berhasil diunduh', 'success');
     }
 
-    // Tutup modal genset jika klik di luar
     document.getElementById('modal-pdf-genset').addEventListener('click', function (e) {
       if (e.target === this) tutupModalPDFGenset();
     });
 
-    // ════════════════════════════════════════════════════
-    // INIT — Fetch pertama & interval 3 detik
-    // ════════════════════════════════════════════════════
     fetchData();
     fetchGenset();
     setInterval(async () => {
-      // Simpan posisi scroll sebelum update otomatis
       const scrollY = window.scrollY;
       await Promise.all([fetchData(), fetchGenset()]);
-      // Pulihkan posisi scroll setelah render selesai
       window.scrollTo({ top: scrollY, behavior: 'instant' });
     }, 3000);
   </script>

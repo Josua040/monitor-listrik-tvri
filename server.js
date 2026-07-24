@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-// Inisialisasi database SQLite — tabel dibuat otomatis jika belum ada
+
 require('./database');
 
 const apiRoutes = require('./routes/api');
@@ -21,10 +21,10 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n✅ Server berjalan di http://localhost:${PORT}`);
-  console.log(`📡 Endpoint PLN    : POST http://localhost:${PORT}/api/listrik`);
-  console.log(`⚡ Endpoint Genset : POST http://localhost:${PORT}/api/genset`);
-  console.log(`📊 Dashboard       : http://localhost:${PORT}`);
-  console.log(`\n🔌 Sektor PLN yang didukung: sector_1 s/d sector_5\n`);
+  console.log(`\n Server berjalan di http://localhost:${PORT}`);
+  console.log(` Endpoint PLN    : POST http://localhost:${PORT}/api/listrik`);
+  console.log(` Endpoint Genset : POST http://localhost:${PORT}/api/genset`);
+  console.log(` Dashboard       : http://localhost:${PORT}`);
+  console.log(`\n Sektor PLN yang didukung: sector_1 s/d sector_5\n`);
 });
 
