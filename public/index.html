@@ -20,9 +20,9 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background-color: #0A0A0A;
       background-image:
-        radial-gradient(ellipse at 50% 0%, rgba(13,27,42,0.85) 0%, transparent 65%),
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        radial-gradient(ellipse at 50% 0%, rgba(13, 27, 42, 0.85) 0%, transparent 65%),
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
       background-size: auto, 40px 40px, 40px 40px;
       background-attachment: fixed;
       color: #F9FAFB;
@@ -235,8 +235,13 @@
       color: #F9FAFB;
     }
 
-    .sc-stat-value.undervoltage { color: #F59E0B; }
-    .sc-stat-value.overvoltage  { color: #EF4444; }
+    .sc-stat-value.undervoltage {
+      color: #F59E0B;
+    }
+
+    .sc-stat-value.overvoltage {
+      color: #EF4444;
+    }
 
     .voltage-badge {
       font-size: 9px;
@@ -266,8 +271,13 @@
       gap: 4px;
     }
 
-    .teg-warn.undervoltage { color: #F59E0B; }
-    .teg-warn.overvoltage  { color: #EF4444; }
+    .teg-warn.undervoltage {
+      color: #F59E0B;
+    }
+
+    .teg-warn.overvoltage {
+      color: #EF4444;
+    }
 
     .sc-time {
       font-size: 10px;
@@ -424,13 +434,11 @@
     }
 
     .header-icon {
-      width: 18px;
-      height: 18px;
-      stroke: #93c5fd;
-      stroke-width: 2;
-      fill: none;
+      height: 32px;
+      width: auto;
       vertical-align: middle;
-      margin-right: 6px;
+      margin-right: 10px;
+      border-radius: 4px;
     }
 
     .genset-card-icon svg {
@@ -850,9 +858,7 @@
 
   <header>
     <h1>
-      <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-      </svg>
+      <img class="header-icon" src="/logo-tvri.jpg" alt="Logo TVRI">
       Monitor Sistem Mati Listrik
     </h1>
     <div class="refresh-badge">
@@ -1270,7 +1276,7 @@
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
-        Export PDF — Data PLN
+        Export Data PLN
       </h3>
       <p>Atur isi laporan yang akan diunduh</p>
       <div class="form-group">
@@ -1325,7 +1331,7 @@
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
-        Export PDF — Data Genset
+        Export PDF Data Genset
       </h3>
       <p>Atur isi laporan genset yang akan diunduh</p>
       <div class="form-group">
@@ -1453,8 +1459,8 @@
         const tegBadgeHtml = tegClass === 'undervoltage'
           ? '<span class="voltage-badge undervoltage">TEGANGAN RENDAH</span>'
           : tegClass === 'overvoltage'
-          ? '<span class="voltage-badge overvoltage">TEGANGAN TINGGI</span>'
-          : '';
+            ? '<span class="voltage-badge overvoltage">TEGANGAN TINGGI</span>'
+            : '';
 
         const noSignalInfoHtml = noSignal && s.last_seen != null
           ? `<div class="sc-no-signal-info">
@@ -1778,7 +1784,7 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const judul = document.getElementById('pdf-judul').value || 'Laporan Monitoring Listrik';
-      const filename = document.getElementById('pdf-filename').value || 'laporan-iot-listrik';
+      const filename = document.getElementById('pdf-filename').value || 'laporan iot listrik';
       const sektorF = document.getElementById('pdf-sector').value;
       const statusF = document.getElementById('pdf-status').value;
       const incStats = document.getElementById('pdf-inc-stats').checked;
@@ -1792,7 +1798,7 @@
       doc.setFontSize(13); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 58, 95);
       doc.text(judul, 14, curY);
       doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
-      doc.text('Sistem Monitoring Mati Listrik — IoT Multi Sector', 14, curY + 5.5);
+      doc.text('Sistem Monitoring Mati Listrik IoT Multi Sector', 14, curY + 5.5);
       doc.text('Dicetak: ' + tanggal, W - 14, curY + 5.5, { align: 'right' });
       doc.setTextColor(0, 0, 0);
       curY += 13;
@@ -1845,7 +1851,7 @@
         doc.setPage(i);
         doc.setFontSize(8); doc.setTextColor(180, 180, 180);
         doc.text('Halaman ' + i + ' dari ' + pageCount, W / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
-        doc.text('IoT Monitor — Sistem Mati Listrik', 14, doc.internal.pageSize.getHeight() - 6);
+        doc.text('Monitor Sistem Mati Listrik', 14, doc.internal.pageSize.getHeight() - 6);
       }
 
       doc.save(filename + '.pdf');
@@ -1887,11 +1893,11 @@
       const ms = Date.now() - new Date(lastSeenUtc.replace(' ', 'T') + 'Z').getTime();
       if (ms < 0) return 'baru saja';
       const detik = Math.floor(ms / 1000);
-      if (detik < 60)  return detik + ' detik lalu';
+      if (detik < 60) return detik + ' detik lalu';
       const menit = Math.floor(ms / 60000);
-      if (menit < 60)  return menit + ' menit lalu';
+      if (menit < 60) return menit + ' menit lalu';
       const jam = Math.floor(ms / 3600000);
-      if (jam < 24)    return jam + ' jam lalu';
+      if (jam < 24) return jam + ' jam lalu';
       const hari = Math.floor(ms / 86400000);
       return hari + ' hari lalu';
     }
@@ -2064,7 +2070,7 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const judul = document.getElementById('gpdf-judul').value || 'Laporan Monitoring Genset';
-      const filename = document.getElementById('gpdf-filename').value || 'laporan-genset';
+      const filename = document.getElementById('gpdf-filename').value || 'laporan genset';
       const incStats = document.getElementById('gpdf-inc-stats').checked;
       const incLog = document.getElementById('gpdf-inc-log').checked;
       const tanggal = new Date().toLocaleString('id-ID');
@@ -2146,7 +2152,7 @@
         doc.setPage(i);
         doc.setFontSize(8); doc.setTextColor(180, 180, 180);
         doc.text('Halaman ' + i + ' dari ' + pageCount, W / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
-        doc.text('IoT Monitor — Sistem Genset TVRI', 14, doc.internal.pageSize.getHeight() - 6);
+        doc.text('Monitor Sistem Genset TVRI', 14, doc.internal.pageSize.getHeight() - 6);
       }
 
       doc.save(filename + '.pdf');
