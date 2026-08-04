@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -170,6 +170,51 @@
       background: rgba(245, 158, 11, 0.08);
       border-radius: 6px;
       border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .sc-genset-section { margin-top: 8px; }
+    .sc-genset-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin-bottom: 7px;
+    }
+    .sc-genset-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .sc-genset-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #9CA3AF;
+      text-transform: uppercase;
+    }
+    .sc-genset-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sc-genset-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      letter-spacing: 0.05em;
+    }
+    .sc-genset-badge.on { background: rgba(34,197,94,0.18); color: #22C55E; border: 1px solid rgba(34,197,94,0.3); }
+    .sc-genset-badge.off { background: rgba(239,68,68,0.18); color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
+    .sc-genset-badge.no-signal { background: rgba(245,158,11,0.15); color: #F59E0B; border: 1px solid rgba(245,158,11,0.3); }
+    .sc-genset-durasi {
+      font-size: 10px;
+      color: #6B7280;
     }
 
     .sc-header {
@@ -936,101 +981,6 @@
 
       <div class="sector-grid" id="sector-grid"></div>
 
-
-
-      <div class="section-divider">
-        <div class="section-divider-line"></div>
-        <div class="section-divider-label">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          Monitoring Genset
-        </div>
-        <div class="section-divider-line" style="background:linear-gradient(to left,#1E2D3D,transparent)"></div>
-      </div>
-
-
-      <!-- Kartu Status Utama -->
-      <div class="genset-status-grid" id="genset-status-grid">
-        <div class="genset-card status-unknown" id="gcard-genset">
-          <div class="genset-card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-            </svg>
-          </div>
-          <div class="genset-card-label">Status Genset</div>
-          <div class="genset-card-value" id="gval-status-genset">—</div>
-          <div class="genset-card-sub" id="gsub-genset">Menunggu data...</div>
-        </div>
-        <div class="genset-card status-unknown" id="gcard-pln">
-          <div class="genset-card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <rect x="6" y="2" width="4" height="6" />
-              <rect x="14" y="2" width="4" height="6" />
-              <path d="M18 8H6l-1 7h14l-1-7z" />
-              <path d="M9 15v7" />
-              <path d="M15 15v7" />
-            </svg>
-          </div>
-          <div class="genset-card-label">Status PLN (sensor genset)</div>
-          <div class="genset-card-value" id="gval-status-pln">—</div>
-          <div class="genset-card-sub" id="gsub-pln">Menunggu data...</div>
-        </div>
-        <div class="genset-card">
-          <div class="genset-card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <ellipse cx="12" cy="5" rx="9" ry="3" />
-              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-            </svg>
-          </div>
-          <div class="genset-card-label">Total data diterima</div>
-          <div class="genset-card-value" id="gval-total">0</div>
-          <div class="genset-card-sub" id="gsub-waktu">—</div>
-        </div>
-        <div class="genset-card">
-          <div class="genset-card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-            </svg>
-          </div>
-          <div class="genset-card-label">Total genset aktif</div>
-          <div class="genset-card-value" id="gval-genset-on">0</div>
-          <div class="genset-card-sub">kali data ON</div>
-        </div>
-      </div>
-
-      <!-- Kartu Nilai Arus & Daya -->
-      <div class="genset-val-grid">
-        <div class="genset-val-card">
-          <div class="genset-val-label">Arus Phase R</div>
-          <div class="genset-val-number" id="gval-arus-r">—<span class="genset-val-unit">A</span></div>
-        </div>
-        <div class="genset-val-card">
-          <div class="genset-val-label">Arus Phase S</div>
-          <div class="genset-val-number" id="gval-arus-s">—<span class="genset-val-unit">A</span></div>
-        </div>
-        <div class="genset-val-card">
-          <div class="genset-val-label">Daya Phase R</div>
-          <div class="genset-val-number" id="gval-daya-r">—<span class="genset-val-unit">W</span></div>
-        </div>
-        <div class="genset-val-card">
-          <div class="genset-val-label">Daya Phase S</div>
-          <div class="genset-val-number" id="gval-daya-s">—<span class="genset-val-unit">W</span></div>
-        </div>
-      </div>
-
-      <!-- Total Daya Highlight -->
-      <div class="genset-total-daya">
-        <div class="genset-total-daya-label">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-            style="width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;vertical-align:middle;margin-right:5px;">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
-          Total Daya Gabungan (R + S)
-        </div>
-        <div class="genset-total-daya-value" id="gval-total-daya">— W</div>
-      </div>
-
-
       <div class="section">
         <div class="section-title">
           Kejadian Terbaru PLN
@@ -1318,16 +1268,13 @@
                 <th>Waktu</th>
                 <th>Status Genset</th>
                 <th>Status PLN</th>
-                <th>Arus R</th>
-                <th>Arus S</th>
-                <th>Daya R</th>
-                <th>Daya S</th>
+                <th>Durasi Aktif</th>
                 <th>Diterima Server</th>
               </tr>
             </thead>
             <tbody id="tbody-genset">
               <tr>
-                <td colspan="9" class="empty">Menunggu data dari alat genset...</td>
+                <td colspan="6" class="empty">Menunggu data dari alat genset...</td>
               </tr>
             </tbody>
           </table>
@@ -1544,6 +1491,28 @@
             </div>`
           : '';
 
+        // ── Section Genset per card ──
+        const gId = s.sector_id.replace('sector_', 'genset_');
+        const gStat = (gensetStats.gensets || []).find(g => g.genset_id === gId);
+        let gensetBadgeHtml = '';
+        let gensetDurasiHtml = '—';
+        if (!gStat || gStat.last_seen == null) {
+          gensetBadgeHtml = `<span class="sc-genset-badge no-signal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="2" x2="22" y2="22"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 4.17-2.65"/><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"/><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"/><path d="M5 13a10 10 0 0 1 5.24-2.76"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            NO SIGNAL</span>`;
+        } else if (!gStat.isOnline) {
+          gensetBadgeHtml = `<span class="sc-genset-badge no-signal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="2" x2="22" y2="22"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 4.17-2.65"/><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"/><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"/><path d="M5 13a10 10 0 0 1 5.24-2.76"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            NO SIGNAL</span>`;
+        } else {
+          const gStatus = gStat.last_status ?? '—';
+          const gClass = gStatus === 'ON' ? 'on' : gStatus === 'OFF' ? 'off' : 'unknown';
+          gensetBadgeHtml = `<span class="sc-genset-badge ${gClass}">${gStatus}</span>`;
+        }
+        if (gensetStats.lastDurasiAktif != null) {
+          gensetDurasiHtml = formatDurasi(gensetStats.lastDurasiAktif);
+        }
+
         return `
         <div class="sector-card status-${stClass}">
           <div class="sc-header">
@@ -1571,6 +1540,19 @@
           </div>
           <div class="sc-time">${noSignal ? (s.last_seen ?? 'Belum ada data') : (s.waktuTerakhir ?? 'Belum ada data')}</div>
           ${noSignalInfoHtml}
+          <div class="sc-genset-section">
+            <div class="sc-genset-divider"></div>
+            <div class="sc-genset-row">
+              <div class="sc-genset-label">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                GENSET
+              </div>
+              <div class="sc-genset-info">
+                ${gensetBadgeHtml}
+                <span class="sc-genset-durasi">Durasi: ${gensetDurasiHtml}</span>
+              </div>
+            </div>
+          </div>
         </div>`;
       }).join('');
 
@@ -2000,41 +1982,12 @@
     }
 
     function renderGenset() {
-      const gs = gensetStats;
-
-      const stG = gs.statusGensetTerakhir ?? null;
-      const stP = gs.statusPlnTerakhir ?? null;
-
-      const cardGenset = document.getElementById('gcard-genset');
-      cardGenset.className = 'genset-card status-' + (stG === 'ON' ? 'on' : stG === 'OFF' ? 'off' : 'unknown');
-      document.getElementById('gval-status-genset').textContent = stG ?? '—';
-      document.getElementById('gval-status-genset').className = 'genset-card-value ' + (stG ? stG.toLowerCase() : '');
-      document.getElementById('gsub-genset').textContent = stG === 'ON' ? 'Genset sedang aktif' : stG === 'OFF' ? 'Genset tidak aktif' : 'Menunggu data...';
-
-      const cardPln = document.getElementById('gcard-pln');
-      cardPln.className = 'genset-card status-' + (stP === 'ON' ? 'on' : stP === 'OFF' ? 'off' : 'unknown');
-      document.getElementById('gval-status-pln').textContent = stP ?? '—';
-      document.getElementById('gval-status-pln').className = 'genset-card-value ' + (stP ? stP.toLowerCase() : '');
-      document.getElementById('gsub-pln').textContent = stP === 'ON' ? 'PLN menyala' : stP === 'OFF' ? 'PLN padam' : 'Menunggu data...';
-
-      document.getElementById('gval-total').textContent = gs.total ?? 0;
-      document.getElementById('gval-genset-on').textContent = gs.totalGensetOn ?? 0;
-      document.getElementById('gsub-waktu').textContent = gs.waktuTerakhir ? 'Update: ' + gs.waktuTerakhir : '—';
-
-      const latest = gensetData[0] ?? {};
-      const fNum = (v, d) => v != null ? Number(v).toFixed(d) : '—';
-
-      document.getElementById('gval-arus-r').innerHTML = fNum(latest.arus_r, 2) + '<span class="genset-val-unit">A</span>';
-      document.getElementById('gval-arus-s').innerHTML = fNum(latest.arus_s, 2) + '<span class="genset-val-unit">A</span>';
-      document.getElementById('gval-daya-r').innerHTML = fNum(latest.daya_r, 0) + '<span class="genset-val-unit">W</span>';
-      document.getElementById('gval-daya-s').innerHTML = fNum(latest.daya_s, 0) + '<span class="genset-val-unit">W</span>';
-
-      const totalDaya = gs.totalDayaTerakhir != null ? gs.totalDayaTerakhir + ' W' : '— W';
-      document.getElementById('gval-total-daya').textContent = totalDaya;
-
+      // Render tabel log genset saja (kartu lama sudah dihapus)
       const tbody = document.getElementById('tbody-genset');
+      if (!tbody) return;
+
       if (!gensetData.length) {
-        tbody.innerHTML = '<tr><td colspan="9" class="empty">Menunggu data dari alat genset...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">Menunggu data dari alat genset...</td></tr>';
         return;
       }
       const limitEl = document.getElementById('genset-log-limit');
@@ -2047,14 +2000,11 @@
         <td style="font-size:12px">${r.waktu}</td>
         <td><span class="badge ${r.status_genset.toLowerCase()}"><span class="dot"></span>${r.status_genset}</span></td>
         <td><span class="badge ${r.status_pln.toLowerCase()}"><span class="dot"></span>${r.status_pln}</span></td>
-        <td>${r.arus_r != null ? r.arus_r + ' A' : '—'}</td>
-        <td>${r.arus_s != null ? r.arus_s + ' A' : '—'}</td>
-        <td>${r.daya_r != null ? r.daya_r + ' W' : '—'}</td>
-        <td>${r.daya_s != null ? r.daya_s + ' W' : '—'}</td>
+        <td>${formatDurasiRow(r.durasi_aktif)}</td>
         <td style="font-size:11px;color:#888">${r.diterima_at}</td>
       </tr>`).join('');
       if (limit > 0 && total > limit) {
-        tbody.innerHTML += `<tr><td colspan="9" style="text-align:center;padding:10px 0;color:#6B7280;font-size:12px">Menampilkan ${limit} dari ${total} data. Pilih "Semua" untuk melihat semua log.</td></tr>`;
+        tbody.innerHTML += `<tr><td colspan="6" style="text-align:center;padding:10px 0;color:#6B7280;font-size:12px">Menampilkan ${limit} dari ${total} data. Pilih "Semua" untuk melihat semua log.</td></tr>`;
       }
     }
 

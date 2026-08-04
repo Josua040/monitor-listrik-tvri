@@ -1,5 +1,5 @@
 {
-  "name": "iot-server-v2",
+  "name": "monitor listrik tvri",
   "version": "2.0.0",
   "description": "Web server IoT multi-device — Sistem Mati Listrik",
   "main": "server.js",

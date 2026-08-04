@@ -27,18 +27,33 @@ db.exec(
   '  daya_s         INTEGER,' +
   '  status_pln     TEXT    NOT NULL,' +
   '  status_genset  TEXT    NOT NULL,' +
+  '  durasi_aktif   REAL,' +
   '  waktu          TEXT    NOT NULL,' +
   '  diterima_at    TEXT    NOT NULL' +
   ')'
 );
 
-// Menyimpan waktu terakhir data diterima per sektor (fitur NO SIGNAL)
+// Migrasi: tambah kolom durasi_aktif jika DB lama belum punya
+try {
+  db.exec('ALTER TABLE genset_log ADD COLUMN durasi_aktif REAL');
+} catch (e) { /* kolom sudah ada, abaikan */ }
+
+// Menyimpan waktu terakhir data diterima per sektor PLN (fitur NO SIGNAL)
 db.exec(
   'CREATE TABLE IF NOT EXISTS sector_heartbeat (' +
   '  sector_id     TEXT PRIMARY KEY,' +
   '  last_seen     TEXT NOT NULL,' +
   '  last_status   TEXT,' +
   '  last_tegangan REAL' +
+  ')'
+);
+
+// Menyimpan waktu terakhir data diterima per genset (fitur NO SIGNAL genset)
+db.exec(
+  'CREATE TABLE IF NOT EXISTS genset_heartbeat (' +
+  '  genset_id   TEXT PRIMARY KEY,' +
+  '  last_seen   TEXT NOT NULL,' +
+  '  last_status TEXT' +
   ')'
 );
 
