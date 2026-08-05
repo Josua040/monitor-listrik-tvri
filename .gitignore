@@ -26,3 +26,6 @@ desktop.ini
 # ── Temporary files ───────────────────────
 *.tmp
 *.temp
+
+# ── Private / Context Docs ────────────────
+PROJECT_CONTEXT.md

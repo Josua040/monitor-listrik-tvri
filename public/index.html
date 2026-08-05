@@ -9,7 +9,53 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>
+    (function () {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'light') {
+        document.documentElement.classList.add('light');
+      }
+    })();
+  </script>
   <style>
+    :root {
+      --bg-utama: #0A0A0A;
+      --bg-nav: #0D1B2A;
+      --bg-card: #111827;
+      --bg-hover: #1E2D3D;
+      --border: #1E2D3D;
+      --border-2: #2D3748;
+      --teks-utama: #F9FAFB;
+      --teks-sekunder: #9CA3AF;
+      --teks-muted: #6B7280;
+      --aksen-hijau: #22C55E;
+      --aksen-hijau-hover: #16A34A;
+      --aksen-merah: #EF4444;
+      --aksen-amber: #F59E0B;
+      --aksen-biru: #3B82F6;
+      --chart-grid: rgba(255,255,255,0.08);
+      --chart-teks: #9CA3AF;
+    }
+
+    :root.light {
+      --bg-utama: #F5F5F5;
+      --bg-nav: #1E3A5F;
+      --bg-card: #FFFFFF;
+      --bg-hover: #F0F4F8;
+      --border: #E5E7EB;
+      --border-2: #D1D5DB;
+      --teks-utama: #1A1A1A;
+      --teks-sekunder: #4B5563;
+      --teks-muted: #6B7280;
+      --aksen-hijau: #16A34A;
+      --aksen-hijau-hover: #15803D;
+      --aksen-merah: #DC2626;
+      --aksen-amber: #D97706;
+      --aksen-biru: #2563EB;
+      --chart-grid: rgba(0,0,0,0.08);
+      --chart-teks: #4B5563;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -18,29 +64,63 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: #0A0A0A;
+      background-color: var(--bg-utama);
       background-image:
         radial-gradient(ellipse at 50% 0%, rgba(13, 27, 42, 0.85) 0%, transparent 65%),
         linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
       background-size: auto, 40px 40px, 40px 40px;
       background-attachment: fixed;
-      color: #F9FAFB;
+      color: var(--teks-utama);
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    :root.light body {
+      background-color: var(--bg-utama);
+      background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(30, 58, 95, 0.06) 0%, transparent 65%),
+        linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
     }
 
     header {
-      background: #0D1B2A;
+      background: var(--bg-nav);
       padding: 14px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #1E2D3D;
+      border-bottom: 1px solid var(--border);
+      transition: background-color 0.2s, border-color 0.2s;
     }
 
     header h1 {
       font-size: 15px;
       font-weight: 600;
       color: #fff;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      padding: 5px 8px;
+      cursor: pointer;
+      color: #F9FAFB;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.35);
     }
 
     .refresh-badge {
@@ -60,7 +140,6 @@
     }
 
     @keyframes pulse {
-
       0%,
       100% {
         opacity: 1
@@ -81,10 +160,11 @@
       display: flex;
       gap: 4px;
       margin-bottom: 20px;
-      background: #0D1B2A;
+      background: var(--bg-nav);
       border-radius: 10px;
-      border: 1px solid #1E2D3D;
+      border: 1px solid var(--border);
       padding: 6px;
+      transition: background-color 0.2s, border-color 0.2s;
     }
 
     .nav-btn {
@@ -95,20 +175,21 @@
       border: none;
       background: none;
       cursor: pointer;
-      color: #9CA3AF;
+      color: rgba(255, 255, 255, 0.7);
       font-weight: 500;
       transition: all 0.15s;
       text-align: center;
     }
 
     .nav-btn:hover {
-      background: #1E2D3D;
-      color: #F9FAFB;
+      background: rgba(255, 255, 255, 0.12);
+      color: #FFFFFF;
     }
 
     .nav-btn.active {
-      background: #22C55E;
+      background: var(--aksen-hijau);
       color: #000;
+      font-weight: 600;
     }
 
     .panel {
@@ -127,33 +208,38 @@
     }
 
     .sector-card {
-      background: #111827;
+      background: var(--bg-card);
       border-radius: 10px;
-      border: 1px solid #1E2D3D;
+      border: 1px solid var(--border);
       padding: 16px;
-      border-top: 4px solid #2D3748;
-      transition: background 0.15s;
+      border-top: 4px solid var(--border-2);
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    :root.light .sector-card {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .sector-card:hover {
-      background: #1E2D3D;
+      background: var(--bg-hover);
     }
 
     .sector-card.status-on {
-      border-top-color: #22C55E;
+      border-top-color: var(--aksen-hijau);
     }
 
     .sector-card.status-off {
-      border-top-color: #EF4444;
+      border-top-color: var(--aksen-merah);
     }
 
     .sector-card.status-no-signal {
-      border-top-color: #F59E0B;
+      border-top-color: var(--aksen-amber);
     }
 
     .sc-badge.no-signal {
       background: rgba(245, 158, 11, 0.15);
-      color: #F59E0B;
+      color: var(--aksen-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
       display: inline-flex;
       align-items: center;
       gap: 4px;
@@ -164,7 +250,7 @@
       align-items: center;
       gap: 5px;
       font-size: 10px;
-      color: #F59E0B;
+      color: var(--aksen-amber);
       margin-top: 8px;
       padding: 5px 8px;
       background: rgba(245, 158, 11, 0.08);
@@ -175,7 +261,7 @@
     .sc-genset-section { margin-top: 8px; }
     .sc-genset-divider {
       height: 1px;
-      background: rgba(255,255,255,0.08);
+      background: var(--border);
       margin-bottom: 7px;
     }
     .sc-genset-row {
@@ -191,7 +277,7 @@
       font-size: 9px;
       font-weight: 700;
       letter-spacing: 0.08em;
-      color: #9CA3AF;
+      color: var(--teks-sekunder);
       text-transform: uppercase;
     }
     .sc-genset-info {
@@ -209,12 +295,12 @@
       gap: 3px;
       letter-spacing: 0.05em;
     }
-    .sc-genset-badge.on { background: rgba(34,197,94,0.18); color: #22C55E; border: 1px solid rgba(34,197,94,0.3); }
-    .sc-genset-badge.off { background: rgba(239,68,68,0.18); color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
-    .sc-genset-badge.no-signal { background: rgba(245,158,11,0.15); color: #F59E0B; border: 1px solid rgba(245,158,11,0.3); }
+    .sc-genset-badge.on { background: rgba(34,197,94,0.18); color: var(--aksen-hijau); border: 1px solid rgba(34,197,94,0.3); }
+    .sc-genset-badge.off { background: rgba(239,68,68,0.18); color: var(--aksen-merah); border: 1px solid rgba(239,68,68,0.3); }
+    .sc-genset-badge.no-signal { background: rgba(245,158,11,0.15); color: var(--aksen-amber); border: 1px solid rgba(245,158,11,0.3); }
     .sc-genset-durasi {
       font-size: 10px;
-      color: #6B7280;
+      color: var(--teks-muted);
     }
 
     .sc-header {
@@ -227,7 +313,7 @@
     .sc-name {
       font-size: 13px;
       font-weight: 700;
-      color: #9CA3AF;
+      color: var(--teks-sekunder);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
@@ -241,17 +327,20 @@
 
     .sc-badge.on {
       background: rgba(34, 197, 94, 0.15);
-      color: #22C55E;
+      color: var(--aksen-hijau);
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
     .sc-badge.off {
       background: rgba(239, 68, 68, 0.15);
-      color: #EF4444;
+      color: var(--aksen-merah);
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
     .sc-badge.unknown {
-      background: #1E2D3D;
-      color: #6B7280;
+      background: var(--bg-hover);
+      color: var(--teks-muted);
+      border: 1px solid var(--border);
     }
 
     .sc-stats {
@@ -261,31 +350,31 @@
     }
 
     .sc-stat {
-      background: #0A0A0A;
+      background: var(--bg-utama);
       border-radius: 6px;
       padding: 7px 9px;
-      border: 1px solid #1E2D3D;
+      border: 1px solid var(--border);
+      transition: background 0.15s, border-color 0.15s;
     }
 
     .sc-stat-label {
       font-size: 10px;
-      color: #6B7280;
+      color: var(--teks-muted);
       margin-bottom: 2px;
     }
-
 
     .sc-stat-value {
       font-size: 14px;
       font-weight: 600;
-      color: #F9FAFB;
+      color: var(--teks-utama);
     }
 
     .sc-stat-value.undervoltage {
-      color: #F59E0B;
+      color: var(--aksen-amber);
     }
 
     .sc-stat-value.overvoltage {
-      color: #EF4444;
+      color: var(--aksen-merah);
     }
 
     .voltage-badge {
@@ -300,13 +389,13 @@
 
     .voltage-badge.undervoltage {
       background: rgba(245, 158, 11, 0.15);
-      color: #F59E0B;
+      color: var(--aksen-amber);
       border: 1px solid rgba(245, 158, 11, 0.25);
     }
 
     .voltage-badge.overvoltage {
       background: rgba(239, 68, 68, 0.15);
-      color: #EF4444;
+      color: var(--aksen-merah);
       border: 1px solid rgba(239, 68, 68, 0.25);
     }
 
@@ -317,13 +406,12 @@
     }
 
     .teg-warn.undervoltage {
-      color: #F59E0B;
+      color: var(--aksen-amber);
     }
 
     .teg-warn.overvoltage {
-      color: #EF4444;
+      color: var(--aksen-merah);
     }
-
 
     .section-divider {
       display: flex;
@@ -335,7 +423,11 @@
     .section-divider-line {
       flex: 1;
       height: 1px;
-      background: linear-gradient(to right, #1E2D3D, transparent);
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+
+    .section-divider-line.right {
+      background: linear-gradient(to left, var(--border), transparent);
     }
 
     .section-divider-label {
@@ -345,7 +437,7 @@
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.08em;
-      color: #6B7280;
+      color: var(--teks-muted);
       text-transform: uppercase;
       white-space: nowrap;
     }
@@ -353,16 +445,16 @@
     .section-divider-label svg {
       width: 13px;
       height: 13px;
-      stroke: #6B7280;
+      stroke: var(--teks-muted);
       stroke-width: 2;
       fill: none;
     }
+
     .sc-time {
       font-size: 10px;
-      color: #6B7280;
+      color: var(--teks-muted);
       margin-top: 8px;
     }
-
 
     .summary-bar {
       display: grid;
@@ -372,44 +464,54 @@
     }
 
     .sum-card {
-      background: #111827;
+      background: var(--bg-card);
       border-radius: 10px;
-      border: 1px solid #1E2D3D;
+      border: 1px solid var(--border);
       padding: 14px 16px;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    :root.light .sum-card {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .sum-label {
       font-size: 11px;
-      color: #9CA3AF;
+      color: var(--teks-sekunder);
       margin-bottom: 4px;
     }
 
     .sum-value {
       font-size: 24px;
       font-weight: 700;
-      color: #22C55E;
+      color: var(--aksen-hijau);
     }
 
     .sum-value.red {
-      color: #EF4444;
+      color: var(--aksen-merah);
     }
 
     .sum-value.green {
-      color: #22C55E;
+      color: var(--aksen-hijau);
     }
 
     .section {
-      background: #111827;
+      background: var(--bg-card);
       border-radius: 10px;
-      border: 1px solid #1E2D3D;
+      border: 1px solid var(--border);
       padding: 18px;
       margin-bottom: 16px;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    :root.light .section {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .section-title {
       font-size: 14px;
       font-weight: 600;
-      color: #F9FAFB;
+      color: var(--teks-utama);
       margin-bottom: 14px;
       display: flex;
       align-items: center;
@@ -428,16 +530,17 @@
 
     .filter-bar label {
       font-size: 12px;
-      color: #9CA3AF;
+      color: var(--teks-sekunder);
     }
 
     select.fs {
       font-size: 13px;
       padding: 6px 10px;
       border-radius: 6px;
-      border: 1px solid #2D3748;
-      background: #0D1B2A;
-      color: #F9FAFB;
+      border: 1px solid var(--border-2);
+      background: var(--bg-card);
+      color: var(--teks-utama);
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
     }
 
     .filter-actions {
@@ -450,36 +553,36 @@
       font-size: 13px;
       padding: 7px 14px;
       border-radius: 6px;
-      border: 1px solid #2D3748;
-      background: #1E2D3D;
-      color: #F9FAFB;
+      border: 1px solid var(--border-2);
+      background: var(--bg-hover);
+      color: var(--teks-utama);
       cursor: pointer;
       font-weight: 500;
       display: inline-flex;
       align-items: center;
       gap: 5px;
       white-space: nowrap;
-      transition: background 0.15s;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
     }
 
     .btn:hover {
-      background: #2D3748;
+      background: var(--border-2);
     }
 
     .btn.primary {
-      background: #22C55E;
+      background: var(--aksen-hijau);
       color: #000;
-      border-color: #22C55E;
+      border-color: var(--aksen-hijau);
     }
 
     .btn.primary:hover {
-      background: #16A34A;
-      border-color: #16A34A;
+      background: var(--aksen-hijau-hover);
+      border-color: var(--aksen-hijau-hover);
     }
 
     .btn.danger {
       background: rgba(239, 68, 68, 0.15);
-      color: #EF4444;
+      color: var(--aksen-merah);
       border-color: rgba(239, 68, 68, 0.3);
     }
 
@@ -522,23 +625,23 @@
     .genset-card-icon svg {
       width: 28px;
       height: 28px;
-      stroke: #9CA3AF;
+      stroke: var(--teks-sekunder);
       stroke-width: 1.5;
       fill: none;
     }
 
     .genset-card.status-on .genset-card-icon svg {
-      stroke: #22C55E;
+      stroke: var(--aksen-hijau);
     }
 
     .genset-card.status-off .genset-card-icon svg {
-      stroke: #EF4444;
+      stroke: var(--aksen-merah);
     }
 
     .btn.pdf {
-      background: #3B82F6;
+      background: var(--aksen-biru);
       color: #fff;
-      border-color: #3B82F6;
+      border-color: var(--aksen-biru);
     }
 
     .btn.pdf:hover {
@@ -561,9 +664,9 @@
       text-align: left;
       font-size: 11px;
       font-weight: 600;
-      color: #6B7280;
+      color: var(--teks-muted);
       padding: 8px 12px;
-      border-bottom: 1px solid #1E2D3D;
+      border-bottom: 1px solid var(--border);
       text-transform: uppercase;
       letter-spacing: 0.04em;
       white-space: nowrap;
@@ -571,9 +674,9 @@
 
     td {
       padding: 9px 12px;
-      border-bottom: 1px solid #1E2D3D;
+      border-bottom: 1px solid var(--border);
       white-space: nowrap;
-      color: #F9FAFB;
+      color: var(--teks-utama);
     }
 
     tr:last-child td {
@@ -581,7 +684,7 @@
     }
 
     tr:hover td {
-      background: #1E2D3D;
+      background: var(--bg-hover);
     }
 
     .badge {
@@ -596,12 +699,14 @@
 
     .badge.on {
       background: rgba(34, 197, 94, 0.15);
-      color: #22C55E;
+      color: var(--aksen-hijau);
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
     .badge.off {
       background: rgba(239, 68, 68, 0.15);
-      color: #EF4444;
+      color: var(--aksen-merah);
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
     .dot {
@@ -617,13 +722,13 @@
       padding: 2px 9px;
       border-radius: 99px;
       background: rgba(34, 197, 94, 0.1);
-      color: #22C55E;
+      color: var(--aksen-hijau);
       border: 1px solid rgba(34, 197, 94, 0.25);
     }
 
     .empty {
       text-align: center;
-      color: #6B7280;
+      color: var(--teks-muted);
       padding: 32px;
       font-size: 13px;
     }
@@ -642,16 +747,21 @@
     }
 
     .chart-box {
-      background: #111827;
+      background: var(--bg-card);
       border-radius: 10px;
-      border: 1px solid #1E2D3D;
+      border: 1px solid var(--border);
       padding: 16px;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    :root.light .chart-box {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .chart-title {
       font-size: 13px;
       font-weight: 600;
-      color: #F9FAFB;
+      color: var(--teks-utama);
       margin-bottom: 12px;
     }
 
@@ -665,7 +775,7 @@
 
     .chart-filter label {
       font-size: 12px;
-      color: #9CA3AF;
+      color: var(--teks-sekunder);
     }
 
     .sub-tabs {
@@ -678,27 +788,29 @@
       font-size: 12px;
       padding: 5px 12px;
       border-radius: 6px;
-      border: 1px solid #2D3748;
-      background: #1E2D3D;
+      border: 1px solid var(--border-2);
+      background: var(--bg-hover);
       cursor: pointer;
-      color: #9CA3AF;
-      transition: background 0.15s;
+      color: var(--teks-sekunder);
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
     }
 
     .sub-tab.active {
-      background: #22C55E;
+      background: var(--aksen-hijau);
       color: #000;
-      border-color: #22C55E;
+      border-color: var(--aksen-hijau);
+      font-weight: 600;
     }
 
     .modal-backdrop {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.6);
       z-index: 100;
       align-items: center;
       justify-content: center;
+      transition: opacity 0.2s;
     }
 
     .modal-backdrop.show {
@@ -706,26 +818,27 @@
     }
 
     .modal {
-      background: #111827;
-      border: 1px solid #1E2D3D;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 24px;
       width: 100%;
       max-width: 440px;
       margin: 16px;
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
 
     .modal h3 {
       font-size: 15px;
       font-weight: 600;
-      color: #F9FAFB;
+      color: var(--teks-utama);
       margin-bottom: 4px;
     }
 
     .modal p {
       font-size: 13px;
-      color: #9CA3AF;
+      color: var(--teks-sekunder);
       margin-bottom: 16px;
     }
 
@@ -738,7 +851,7 @@
 
     .form-group label {
       font-size: 12px;
-      color: #9CA3AF;
+      color: var(--teks-sekunder);
     }
 
     .form-group input,
@@ -746,9 +859,10 @@
       font-size: 13px;
       padding: 7px 10px;
       border-radius: 6px;
-      border: 1px solid #2D3748;
-      background: #0D1B2A;
-      color: #F9FAFB;
+      border: 1px solid var(--border-2);
+      background: var(--bg-utama);
+      color: var(--teks-utama);
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
     }
 
     .modal-footer {
@@ -760,7 +874,7 @@
 
     .divider {
       height: 1px;
-      background: #1E2D3D;
+      background: var(--border);
       margin: 12px 0;
     }
 
@@ -769,14 +883,14 @@
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      color: #9CA3AF;
+      color: var(--teks-sekunder);
       margin-bottom: 8px;
     }
 
     .checkbox-row input[type=checkbox] {
       width: 15px;
       height: 15px;
-      accent-color: #22C55E;
+      accent-color: var(--aksen-hijau);
     }
 
     .genset-status-grid {
@@ -787,29 +901,29 @@
     }
 
     .genset-card {
-      background: #111827;
+      background: var(--bg-card);
       border-radius: 10px;
-      border: 1px solid #1E2D3D;
+      border: 1px solid var(--border);
       padding: 18px 16px;
       text-align: center;
-      border-top: 4px solid #2D3748;
-      transition: background 0.15s;
+      border-top: 4px solid var(--border-2);
+      transition: background 0.15s, border-color 0.15s;
     }
 
     .genset-card:hover {
-      background: #1E2D3D;
+      background: var(--bg-hover);
     }
 
     .genset-card.status-on {
-      border-top-color: #22C55E;
+      border-top-color: var(--aksen-hijau);
     }
 
     .genset-card.status-off {
-      border-top-color: #EF4444;
+      border-top-color: var(--aksen-merah);
     }
 
     .genset-card.status-unknown {
-      border-top-color: #6B7280;
+      border-top-color: var(--teks-muted);
     }
 
     .genset-card-icon {
@@ -819,7 +933,7 @@
 
     .genset-card-label {
       font-size: 11px;
-      color: #6B7280;
+      color: var(--teks-muted);
       margin-bottom: 4px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -828,20 +942,20 @@
     .genset-card-value {
       font-size: 22px;
       font-weight: 700;
-      color: #F9FAFB;
+      color: var(--teks-utama);
     }
 
     .genset-card-value.on {
-      color: #22C55E;
+      color: var(--aksen-hijau);
     }
 
     .genset-card-value.off {
-      color: #EF4444;
+      color: var(--aksen-merah);
     }
 
     .genset-card-sub {
       font-size: 11px;
-      color: #6B7280;
+      color: var(--teks-muted);
       margin-top: 4px;
     }
 
@@ -853,39 +967,39 @@
     }
 
     .genset-val-card {
-      background: #111827;
+      background: var(--bg-card);
       border-radius: 10px;
-      border: 1px solid #1E2D3D;
+      border: 1px solid var(--border);
       padding: 14px 16px;
-      transition: background 0.15s;
+      transition: background 0.15s, border-color 0.15s;
     }
 
     .genset-val-card:hover {
-      background: #1E2D3D;
+      background: var(--bg-hover);
     }
 
     .genset-val-label {
       font-size: 11px;
-      color: #6B7280;
+      color: var(--teks-muted);
       margin-bottom: 4px;
     }
 
     .genset-val-number {
       font-size: 20px;
       font-weight: 700;
-      color: #22C55E;
+      color: var(--aksen-hijau);
     }
 
     .genset-val-unit {
       font-size: 12px;
       font-weight: 400;
-      color: #9CA3AF;
+      color: var(--teks-sekunder);
       margin-left: 2px;
     }
 
     .genset-total-daya {
-      background: linear-gradient(135deg, #0D1B2A 0%, #1E3A5F 50%, #166534 100%);
-      border: 1px solid #1E2D3D;
+      background: linear-gradient(135deg, var(--bg-nav) 0%, #1E3A5F 50%, #166534 100%);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 14px 20px;
       display: flex;
@@ -897,13 +1011,13 @@
 
     .genset-total-daya-label {
       font-size: 13px;
-      color: #9CA3AF;
+      color: var(--teks-sekunder);
     }
 
     .genset-total-daya-value {
       font-size: 26px;
       font-weight: 700;
-      color: #22C55E;
+      color: var(--aksen-hijau);
     }
 
     #toast {
@@ -919,15 +1033,15 @@
     }
 
     #toast.success {
-      background: #0D1B2A;
-      color: #22C55E;
-      border: 1px solid #22C55E;
+      background: var(--bg-card);
+      color: var(--aksen-hijau);
+      border: 1px solid var(--aksen-hijau);
     }
 
     #toast.error {
-      background: #0D1B2A;
-      color: #EF4444;
-      border: 1px solid #EF4444;
+      background: var(--bg-card);
+      color: var(--aksen-merah);
+      border: 1px solid var(--aksen-merah);
     }
   </style>
 </head>
@@ -939,8 +1053,13 @@
       <img class="header-icon" src="/logo-tvri.jpg" alt="Logo TVRI">
       Monitor Sistem Mati Listrik
     </h1>
-    <div class="refresh-badge">
-      <div class="pulse"></div><span id="last-update">Menunggu data...</span>
+    <div class="header-right">
+      <button id="theme-toggle-btn" class="theme-toggle-btn" onclick="toggleMode()" title="Beralih Mode" aria-label="Beralih Mode">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+      </button>
+      <div class="refresh-badge">
+        <div class="pulse"></div><span id="last-update">Menunggu data...</span>
+      </div>
     </div>
   </header>
 
@@ -1053,40 +1172,6 @@
           <canvas id="chartDurasiPerSektor" height="180"></canvas>
         </div>
       </div>
-
-
-      <div class="section-divider">
-        <div class="section-divider-line"></div>
-        <div class="section-divider-label">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          Grafik Genset
-        </div>
-        <div class="section-divider-line" style="background:linear-gradient(to left,#1E2D3D,transparent)"></div>
-      </div>
-
-
-      <!-- Grafik Arus -->
-      <div class="section">
-        <div class="section-title">
-          Grafik Arus (Ampere)
-          <div class="chart-filter">
-            <label>Data terakhir:</label>
-            <select class="fs" id="genset-chart-limit" onchange="renderGensetGrafik()">
-              <option value="20">20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
-        </div>
-        <canvas id="chartGensetArus" height="100"></canvas>
-      </div>
-
-      <!-- Grafik Daya -->
-      <div class="section">
-        <div class="section-title">Grafik Daya (Watt)</div>
-        <canvas id="chartGensetDaya" height="100"></canvas>
-      </div>
-
     </div>
 
 
@@ -1222,7 +1307,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           Log Genset
         </div>
-        <div class="section-divider-line" style="background:linear-gradient(to left,#1E2D3D,transparent)"></div>
+        <div class="section-divider-line right"></div>
       </div>
 
       <div class="section">
@@ -1398,7 +1483,44 @@
     let allData = [], statsData = {}, riwayatMode = 'hari';
     let chartTeg, chartMati, chartDurasi, chartRiwayat;
     let gensetData = [], gensetStats = {};
-    let chartGensetArus, chartGensetDaya;
+
+    function getChartColors() {
+      const isLight = document.documentElement.classList.contains('light');
+      return {
+        grid: isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)',
+        teks: isLight ? '#4B5563' : '#9CA3AF',
+        bg: isLight ? '#FFFFFF' : '#111827'
+      };
+    }
+
+    function updateToggleIcon() {
+      const isLight = document.documentElement.classList.contains('light');
+      const btn = document.getElementById('theme-toggle-btn');
+      if (!btn) return;
+      btn.setAttribute('aria-label', isLight ? 'Beralih ke Dark Mode' : 'Beralih ke Light Mode');
+      btn.title = isLight ? 'Beralih ke Dark Mode' : 'Beralih ke Light Mode';
+      if (isLight) {
+        btn.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
+      } else {
+        btn.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
+      }
+    }
+
+    function toggleMode() {
+      const isLight = document.documentElement.classList.toggle('light');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      updateToggleIcon();
+      updateChartColors();
+    }
+
+    function updateChartColors() {
+      const aktif = document.querySelector('.panel.active')?.id?.replace('panel-', '');
+      if (aktif === 'grafik') {
+        renderGrafik();
+      } else if (aktif === 'riwayat') {
+        renderRiwayat();
+      }
+    }
 
     function switchNav(name) {
       ['dashboard', 'grafik', 'riwayat', 'log'].forEach(p => {
@@ -1406,7 +1528,7 @@
         document.getElementById('nav-' + p).classList.toggle('active', p === name);
       });
       if (name === 'dashboard') { renderDashboard(); renderGenset(); }
-      if (name === 'grafik') { renderGrafik(); renderGensetGrafik(); }
+      if (name === 'grafik') renderGrafik();
       if (name === 'riwayat') renderRiwayat();
       if (name === 'log') { renderLog(); renderGenset(); }
     }
@@ -1433,9 +1555,12 @@
         statsData = r2;
         renderDashboard();
         renderGenset();
-        document.getElementById('last-update').textContent = 'Update: ' + new Date().toLocaleTimeString('id-ID');
+        const now = new Date();
+        const tgl = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        const jam = now.toLocaleTimeString('id-ID');
+        document.getElementById('last-update').textContent = `Update: ${tgl}, ${jam}`;
         const aktif = document.querySelector('.panel.active')?.id?.replace('panel-', '');
-        if (aktif === 'grafik') { renderGrafik(); renderGensetGrafik(); }
+        if (aktif === 'grafik') renderGrafik();
         if (aktif === 'riwayat') renderRiwayat();
         if (aktif === 'log') renderLog();
       } catch (e) { }
@@ -1583,6 +1708,7 @@
     }
 
     function renderGrafik() {
+      const cc = getChartColors();
       const sektorF = document.getElementById('chart-sector-filter').value;
       const limit = parseInt(document.getElementById('chart-limit').value);
 
@@ -1614,10 +1740,10 @@
           scales: {
             y: {
               beginAtZero: true, max: 260,
-              grid: { color: 'rgba(255,255,255,0.06)' },
-              ticks: { callback: v => v + 'V', color: '#9CA3AF' }
+              grid: { color: cc.grid },
+              ticks: { callback: v => v + 'V', color: cc.teks }
             },
-            x: { ticks: { maxTicksLimit: 10, font: { size: 10 }, color: '#6B7280' }, grid: { display: false } }
+            x: { ticks: { maxTicksLimit: 10, font: { size: 10 }, color: cc.teks }, grid: { display: false } }
           }
         }
       });
@@ -1641,7 +1767,10 @@
         options: {
           responsive: true,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: '#9CA3AF' }, grid: { color: 'rgba(255,255,255,0.06)' } } }
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, color: cc.teks }, grid: { color: cc.grid } },
+            x: { ticks: { color: cc.teks }, grid: { display: false } }
+          }
         }
       });
 
@@ -1659,7 +1788,10 @@
         options: {
           responsive: true,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { color: '#9CA3AF' }, grid: { color: 'rgba(255,255,255,0.06)' } } }
+          scales: {
+            y: { beginAtZero: true, ticks: { color: cc.teks }, grid: { color: cc.grid } },
+            x: { ticks: { color: cc.teks }, grid: { display: false } }
+          }
         }
       });
     }
@@ -1679,6 +1811,7 @@
     }
 
     function renderRiwayat() {
+      const cc = getChartColors();
       const sektorF = document.getElementById('riwayat-sector').value;
       let data = allData;
       if (sektorF) data = data.filter(d => d.sector_id === sektorF);
@@ -1711,10 +1844,11 @@
         },
         options: {
           responsive: true,
-          plugins: { legend: { labels: { color: '#9CA3AF' } } },
+          plugins: { legend: { labels: { color: cc.teks } } },
           scales: {
-            y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Jumlah mati', color: '#9CA3AF' }, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#9CA3AF' } },
-            y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Durasi (mnt)', color: '#9CA3AF' }, grid: { drawOnChartArea: false }, ticks: { color: '#9CA3AF' } }
+            y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Jumlah mati', color: cc.teks }, grid: { color: cc.grid }, ticks: { color: cc.teks } },
+            y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Durasi (mnt)', color: cc.teks }, grid: { drawOnChartArea: false }, ticks: { color: cc.teks } },
+            x: { ticks: { color: cc.teks }, grid: { display: false } }
           }
         }
       });
@@ -1764,17 +1898,17 @@
           : '—';
         return `
       <tr>
-        <td style="color:#bbb;font-size:11px">#${r.id}</td>
+        <td style="color:var(--teks-muted);font-size:11px">#${r.id}</td>
         <td><span class="sector-pill">${namaSektor(r.sector_id)}</span></td>
         <td style="font-size:12px">${r.waktu}</td>
         <td><span class="badge ${r.status.toLowerCase()}"><span class="dot"></span>${r.status}</span></td>
         <td>${tegHtml}</td>
         <td>${formatDurasiRow(r.durasi_mati)}</td>
-        <td style="font-size:11px;color:#888">${r.diterima_at}</td>
+        <td style="font-size:11px;color:var(--teks-muted)">${r.diterima_at}</td>
       </tr>`;
       }).join('');
       if (limit > 0 && total > limit) {
-        tbody.innerHTML += `<tr><td colspan="7" style="text-align:center;padding:10px 0;color:#6B7280;font-size:12px">Menampilkan ${limit} dari ${total} data. Pilih "Semua" untuk melihat semua log.</td></tr>`;
+        tbody.innerHTML += `<tr><td colspan="7" style="text-align:center;padding:10px 0;color:var(--teks-muted);font-size:12px">Menampilkan ${limit} dari ${total} data. Pilih "Semua" untuk melihat semua log.</td></tr>`;
       }
     }
 
@@ -1852,7 +1986,7 @@
       const statusF = document.getElementById('pdf-status').value;
       const incStats = document.getElementById('pdf-inc-stats').checked;
       const incLog = document.getElementById('pdf-inc-log').checked;
-      const tanggal = new Date().toLocaleString('id-ID');
+      const tanggal = new Date().toLocaleDateString('id-ID');
       const W = doc.internal.pageSize.getWidth();
 
       const logoDataUrl = await getLogoBase64();
@@ -1862,7 +1996,7 @@
       doc.text(judul, 14, curY);
       doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
       doc.text('Sistem Monitoring Mati Listrik IoT Multi Sector', 14, curY + 5.5);
-      doc.text('Dicetak: ' + tanggal, W - 14, curY + 5.5, { align: 'right' });
+      doc.text(tanggal, W - 14, curY + 5.5, { align: 'right' });
       doc.setTextColor(0, 0, 0);
       curY += 13;
 
@@ -1914,7 +2048,6 @@
         doc.setPage(i);
         doc.setFontSize(8); doc.setTextColor(180, 180, 180);
         doc.text('Halaman ' + i + ' dari ' + pageCount, W / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
-        doc.text('Monitor Sistem Mati Listrik', 14, doc.internal.pageSize.getHeight() - 6);
       }
 
       doc.save(filename + '.pdf');
@@ -1976,8 +2109,6 @@
         gensetStats = r2;
 
         renderGenset();
-        const aktif = document.querySelector('.panel.active')?.id?.replace('panel-', '');
-        if (aktif === 'grafik') renderGensetGrafik();
       } catch (e) { }
     }
 
@@ -1996,97 +2127,16 @@
       const data = limit > 0 ? gensetData.slice(0, limit) : gensetData;
       tbody.innerHTML = data.map(r => `
       <tr>
-        <td style="color:#bbb;font-size:11px">#${r.id}</td>
+        <td style="color:var(--teks-muted);font-size:11px">#${r.id}</td>
         <td style="font-size:12px">${r.waktu}</td>
         <td><span class="badge ${r.status_genset.toLowerCase()}"><span class="dot"></span>${r.status_genset}</span></td>
         <td><span class="badge ${r.status_pln.toLowerCase()}"><span class="dot"></span>${r.status_pln}</span></td>
         <td>${formatDurasiRow(r.durasi_aktif)}</td>
-        <td style="font-size:11px;color:#888">${r.diterima_at}</td>
+        <td style="font-size:11px;color:var(--teks-muted)">${r.diterima_at}</td>
       </tr>`).join('');
       if (limit > 0 && total > limit) {
-        tbody.innerHTML += `<tr><td colspan="6" style="text-align:center;padding:10px 0;color:#6B7280;font-size:12px">Menampilkan ${limit} dari ${total} data. Pilih "Semua" untuk melihat semua log.</td></tr>`;
+        tbody.innerHTML += `<tr><td colspan="6" style="text-align:center;padding:10px 0;color:var(--teks-muted);font-size:12px">Menampilkan ${limit} dari ${total} data. Pilih "Semua" untuk melihat semua log.</td></tr>`;
       }
-    }
-
-    function renderGensetGrafik() {
-      const limit = parseInt(document.getElementById('genset-chart-limit')?.value ?? 20);
-      const data = [...gensetData].slice(0, limit).reverse();
-
-      if (!data.length) return;
-
-      const labels = data.map(d => d.waktu.slice(11, 16)); // HH:MM
-
-      if (chartGensetArus) chartGensetArus.destroy();
-      chartGensetArus = new Chart(document.getElementById('chartGensetArus'), {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Arus R (A)',
-              data: data.map(d => d.arus_r ?? null),
-              borderColor: '#22C55E',
-              backgroundColor: 'rgba(34,197,94,0.1)',
-              tension: 0.3, fill: true, pointRadius: 3
-            },
-            {
-              label: 'Arus S (A)',
-              data: data.map(d => d.arus_s ?? null),
-              borderColor: '#3B82F6',
-              backgroundColor: 'rgba(59,130,246,0.1)',
-              tension: 0.3, fill: true, pointRadius: 3
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: true, position: 'top', labels: { color: '#9CA3AF' } } },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: { color: 'rgba(255,255,255,0.06)' },
-              ticks: { callback: v => v + ' A', color: '#9CA3AF' }
-            },
-            x: { ticks: { maxTicksLimit: 12, font: { size: 10 }, color: '#6B7280' }, grid: { display: false } }
-          }
-        }
-      });
-
-      if (chartGensetDaya) chartGensetDaya.destroy();
-      chartGensetDaya = new Chart(document.getElementById('chartGensetDaya'), {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Daya R (W)',
-              data: data.map(d => d.daya_r ?? null),
-              borderColor: '#22C55E',
-              backgroundColor: 'rgba(34,197,94,0.1)',
-              tension: 0.3, fill: true, pointRadius: 3
-            },
-            {
-              label: 'Daya S (W)',
-              data: data.map(d => d.daya_s ?? null),
-              borderColor: '#EF4444',
-              backgroundColor: 'rgba(239,68,68,0.1)',
-              tension: 0.3, fill: true, pointRadius: 3
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: true, position: 'top', labels: { color: '#9CA3AF' } } },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: { color: 'rgba(255,255,255,0.06)' },
-              ticks: { callback: v => v + ' W', color: '#9CA3AF' }
-            },
-            x: { ticks: { maxTicksLimit: 12, font: { size: 10 }, color: '#6B7280' }, grid: { display: false } }
-          }
-        }
-      });
     }
 
     async function hapusDataGenset() {
@@ -2110,7 +2160,7 @@
       const filename = document.getElementById('gpdf-filename').value || 'laporan genset';
       const incStats = document.getElementById('gpdf-inc-stats').checked;
       const incLog = document.getElementById('gpdf-inc-log').checked;
-      const tanggal = new Date().toLocaleString('id-ID');
+      const tanggal = new Date().toLocaleDateString('id-ID');
       const W = doc.internal.pageSize.getWidth();
 
       const logoDataUrl = await getLogoBase64();
@@ -2120,7 +2170,7 @@
       doc.text(judul, 14, curY);
       doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
       doc.text('Sistem Monitoring Genset — IoT TVRI', 14, curY + 5.5);
-      doc.text('Dicetak: ' + tanggal, W - 14, curY + 5.5, { align: 'right' });
+      doc.text(tanggal, W - 14, curY + 5.5, { align: 'right' });
       doc.setTextColor(0, 0, 0);
       curY += 13;
 
@@ -2128,19 +2178,13 @@
         doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
         doc.text('Ringkasan Statistik Genset', 14, curY); curY += 4;
 
-        const latest = gensetData[0] ?? {};
         const statsRows = [
           ['Total data diterima', String(gensetStats.total ?? 0)],
           ['Status Genset terakhir', gensetStats.statusGensetTerakhir ?? '—'],
           ['Status PLN terakhir', gensetStats.statusPlnTerakhir ?? '—'],
           ['Total kali Genset ON', String(gensetStats.totalGensetOn ?? 0)],
-          ['Arus R terakhir', latest.arus_r != null ? latest.arus_r + ' A' : '—'],
-          ['Arus S terakhir', latest.arus_s != null ? latest.arus_s + ' A' : '—'],
-          ['Daya R terakhir', latest.daya_r != null ? latest.daya_r + ' W' : '—'],
-          ['Daya S terakhir', latest.daya_s != null ? latest.daya_s + ' W' : '—'],
-          ['Total daya terakhir', gensetStats.totalDayaTerakhir != null ? gensetStats.totalDayaTerakhir + ' W' : '—'],
-          ['Rata-rata Arus R', gensetStats.avgArusR != null ? gensetStats.avgArusR + ' A' : '—'],
-          ['Rata-rata Arus S', gensetStats.avgArusS != null ? gensetStats.avgArusS + ' A' : '—'],
+          ['Durasi aktif terakhir', formatDurasiRow(gensetStats.lastDurasiAktif)],
+          ['Total durasi aktif', formatDurasi(gensetStats.totalDurasiAktif)],
           ['Waktu data terakhir', gensetStats.waktuTerakhir ?? '—']
         ];
         doc.autoTable({
@@ -2162,16 +2206,13 @@
         doc.text('Log Detail Data Genset (' + gensetData.length + ' data)', 14, curY); curY += 4;
         doc.autoTable({
           startY: curY,
-          head: [['ID', 'Waktu', 'Genset', 'PLN', 'Arus R', 'Arus S', 'Daya R', 'Daya S', 'Diterima']],
+          head: [['ID', 'Waktu', 'Status Genset', 'Status PLN', 'Durasi Aktif', 'Diterima']],
           body: gensetData.map(r => [
             '#' + r.id,
             r.waktu,
             r.status_genset,
             r.status_pln,
-            r.arus_r != null ? r.arus_r + ' A' : '—',
-            r.arus_s != null ? r.arus_s + ' A' : '—',
-            r.daya_r != null ? r.daya_r + ' W' : '—',
-            r.daya_s != null ? r.daya_s + ' W' : '—',
+            formatDurasiRow(r.durasi_aktif),
             r.diterima_at
           ]),
           theme: 'striped',
@@ -2189,7 +2230,6 @@
         doc.setPage(i);
         doc.setFontSize(8); doc.setTextColor(180, 180, 180);
         doc.text('Halaman ' + i + ' dari ' + pageCount, W / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
-        doc.text('Monitor Sistem Genset TVRI', 14, doc.internal.pageSize.getHeight() - 6);
       }
 
       doc.save(filename + '.pdf');
@@ -2201,6 +2241,7 @@
       if (e.target === this) tutupModalPDFGenset();
     });
 
+    updateToggleIcon();
     fetchData();
     fetchGenset();
     setInterval(async () => {
