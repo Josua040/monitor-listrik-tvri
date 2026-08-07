@@ -97,6 +97,19 @@
       font-size: 15px;
       font-weight: 600;
       color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-icon {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+      border-radius: 6px;
+      background: #ffffff;
+      padding: 2px 6px;
+      display: inline-block;
     }
 
     .header-right {
@@ -1050,7 +1063,7 @@
 
   <header>
     <h1>
-      <img class="header-icon" src="/logo-tvri.jpg" alt="Logo TVRI">
+      <img class="header-icon" src="/logo-tvri.png" alt="Logo TVRI">
       Monitor Sistem Mati Listrik
     </h1>
     <div class="header-right">
@@ -1911,21 +1924,61 @@
         tbody.innerHTML += `<tr><td colspan="7" style="text-align:center;padding:10px 0;color:var(--teks-muted);font-size:12px">Menampilkan ${limit} dari ${total} data. Pilih "Semua" untuk melihat semua log.</td></tr>`;
       }
     }
-
     async function hapusSemua() {
       if (!confirm('Hapus semua data log dari semua sektor?')) return;
-      await fetch('/api/listrik', { method: 'DELETE' });
+      await fetch('/api/listrik', {
+        method: 'DELETE',
+        headers: {
+          'x-api-key': 'tvri-iot-monitor-2026',
+          'x-confirm-delete': 'yes'
+        }
+      });
       showToast('Semua data dihapus', 'success');
       fetchData();
     }
 
 
     let _logoBase64Cache = null;
+    let _gothamFontsCache = null;
+
+    async function loadGothamFonts(doc) {
+      try {
+        const fonts = [
+          { url: '/fonts/Gotham-Light.ttf',  name: 'Gotham', style: 'light'  },
+          { url: '/fonts/Gotham-Book.ttf',   name: 'Gotham', style: 'normal' },
+          { url: '/fonts/Gotham-Medium.ttf', name: 'Gotham', style: 'medium' },
+          { url: '/fonts/Gotham-Bold.ttf',   name: 'Gotham', style: 'bold'   }
+        ];
+
+        if (!_gothamFontsCache) {
+          _gothamFontsCache = await Promise.all(fonts.map(async font => {
+            const response = await fetch(font.url);
+            if (!response.ok) throw new Error('Gagal memuat font: ' + font.url);
+            const buffer = await response.arrayBuffer();
+            const base64 = btoa(
+              new Uint8Array(buffer).reduce((data, byte) =>
+                data + String.fromCharCode(byte), '')
+            );
+            return { filename: font.url.split('/').pop(), name: font.name, style: font.style, base64 };
+          }));
+        }
+
+        for (const font of _gothamFontsCache) {
+          doc.addFileToVFS(font.filename, font.base64);
+          doc.addFont(font.filename, font.name, font.style);
+        }
+        return true;
+      } catch (e) {
+        console.warn('[PDF] Gagal memuat font Gotham, fallback ke default:', e);
+        return false;
+      }
+    }
 
     async function getLogoBase64() {
       if (_logoBase64Cache) return _logoBase64Cache;
       try {
-        const resp = await fetch('/logo-tvri.jpg');
+        let resp = await fetch('/logo-tvri.png');
+        if (!resp.ok) resp = await fetch('/logo-tvri.jpg');
         const blob = await resp.blob();
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -1939,33 +1992,39 @@
       }
     }
 
-    function gambarHeaderTVRI(doc, W, logoDataUrl) {
-      const logoH = 18;
-      const logoW = 18;
-      const startY = 8;
-      const textX = 14 + (logoDataUrl ? logoW + 4 : 0);
+    function gambarHeaderTVRI(doc, W, logoDataUrl, fontName) {
+      const logoH = 15.5;
+      const logoW = 26;
+      const startY = 8.5;
+      const leftMargin = 14;
+      const textX = leftMargin + (logoDataUrl ? logoW + 5 : 0);
 
       if (logoDataUrl) {
-        doc.addImage(logoDataUrl, 'JPEG', 10, startY, logoW, logoH);
+        doc.addImage(logoDataUrl, 'PNG', leftMargin, startY, logoW, logoH);
       }
 
-      doc.setTextColor(30, 58, 95);
-      doc.setFontSize(9); doc.setFont(undefined, 'bold');
+      doc.setTextColor(24, 52, 91);
+      doc.setFont(fontName, 'bold');
+      doc.setFontSize(10);
       doc.text(
         'LEMBAGA PENYIARAN PUBLIK TELEVISI REPUBLIK INDONESIA',
-        textX, startY + 5
+        textX, startY + 4
       );
-      doc.text('STASIUN SULAWESI UTARA', textX, startY + 10);
+      doc.setFontSize(9);
+      doc.text('STASIUN SULAWESI UTARA', textX, startY + 8.5);
 
-      doc.setFontSize(7.5); doc.setFont(undefined, 'normal');
-      doc.text('JL. TELEVISI, BANJER-TIKALA MANADO, SULAWESI UTARA 95125 INDONESIA', textX, startY + 15);
-      doc.text('P (0431) 868001   F (0431) 860403   WWW.TVRI.GO.ID', textX, startY + 19.5);
+      doc.setFont(fontName, 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(80, 80, 80);
+      doc.text('JL. TELEVISI, BANJER-TIKALA MANADO, SULAWESI UTARA 95125 INDONESIA', textX, startY + 12.8);
+      doc.text('P (0431) 868001   F (0431) 860403   WWW.TVRI.GO.ID', textX, startY + 16.8);
 
-      const lineY = startY + logoH + 4;
-      doc.setDrawColor(30, 58, 95);
+      const lineY = startY + logoH + 3.5;
+      doc.setDrawColor(24, 52, 91);
       doc.setLineWidth(0.8);
-      doc.line(10, lineY, W - 10, lineY);
+      doc.line(leftMargin, lineY, W - leftMargin, lineY);
       doc.setLineWidth(0.2);
+      doc.line(leftMargin, lineY + 0.8, W - leftMargin, lineY + 0.8);
       doc.setTextColor(0, 0, 0);
 
       return lineY + 6;
@@ -1980,6 +2039,10 @@
     async function exportPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const hasGotham = await loadGothamFonts(doc);
+      const fontName = hasGotham ? 'Gotham' : undefined;
+      doc.setFont(fontName, 'normal');
+
       const judul = document.getElementById('pdf-judul').value || 'Laporan Monitoring Listrik';
       const filename = document.getElementById('pdf-filename').value || 'laporan iot listrik';
       const sektorF = document.getElementById('pdf-sector').value;
@@ -1990,23 +2053,32 @@
       const W = doc.internal.pageSize.getWidth();
 
       const logoDataUrl = await getLogoBase64();
-      let curY = gambarHeaderTVRI(doc, W, logoDataUrl);
+      let curY = gambarHeaderTVRI(doc, W, logoDataUrl, fontName);
 
-      doc.setFontSize(13); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 58, 95);
+      doc.setFont(fontName, 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(30, 58, 95);
       doc.text(judul, 14, curY);
-      doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
+
+      doc.setFont(fontName, 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 100, 100);
       doc.text('Sistem Monitoring Mati Listrik IoT Multi Sector', 14, curY + 5.5);
       doc.text(tanggal, W - 14, curY + 5.5, { align: 'right' });
       doc.setTextColor(0, 0, 0);
       curY += 13;
 
       const filterLabel = [(sektorF || 'Semua sektor'), (statusF || 'Semua status')].join(' | ');
-      doc.setFontSize(9); doc.setTextColor(100, 100, 100);
+      doc.setFont(fontName, 'medium');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
       doc.text('Filter: ' + filterLabel, 14, curY);
       curY += 8;
 
       if (incStats && statsData.sectors) {
-        doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+        doc.setFont(fontName, 'medium');
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
         doc.text('Ringkasan Statistik per Sektor', 14, curY); curY += 4;
         const rows = statsData.sectors
           .filter(s => !sektorF || s.sector_id === sektorF)
@@ -2014,9 +2086,12 @@
         doc.autoTable({
           startY: curY,
           head: [['Sektor', 'Status Terakhir', 'Total Kejadian', 'Total Mati', 'Total Durasi', 'Waktu Terakhir']],
-          body: rows, theme: 'grid',
-          headStyles: { fillColor: [30, 58, 95], textColor: 255, fontSize: 9, fontStyle: 'bold' },
-          bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [240, 244, 255] },
+          body: rows,
+          theme: 'grid',
+          styles: { font: fontName, fontStyle: 'normal' },
+          headStyles: { font: fontName, fontStyle: 'bold', fillColor: [30, 58, 95], textColor: 255, fontSize: 9 },
+          bodyStyles: { font: fontName, fontStyle: 'normal', fontSize: 9 },
+          alternateRowStyles: { fillColor: [240, 244, 255] },
           margin: { left: 14, right: 14 }
         });
         curY = doc.lastAutoTable.finalY + 10;
@@ -2026,10 +2101,14 @@
         let data = allData;
         if (sektorF) data = data.filter(d => d.sector_id === sektorF);
         if (statusF) data = data.filter(d => d.status === statusF);
-        doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+        doc.setFont(fontName, 'medium');
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
         doc.text('Log Detail Kejadian (' + data.length + ' data)', 14, curY); curY += 4;
         if (!data.length) {
-          doc.setFontSize(9); doc.setFont(undefined, 'normal'); doc.setTextColor(150, 150, 150);
+          doc.setFont(fontName, 'light');
+          doc.setFontSize(9);
+          doc.setTextColor(150, 150, 150);
           doc.text('Tidak ada data sesuai filter.', 14, curY + 6);
         } else {
           doc.autoTable({
@@ -2037,8 +2116,10 @@
             head: [['ID', 'Sektor', 'Waktu', 'Status', 'Tegangan', 'Durasi Mati', 'Diterima']],
             body: data.map(r => ['#' + r.id, namaSektor(r.sector_id), r.waktu, r.status, r.tegangan != null ? r.tegangan + ' V' : '-', formatDurasiRow(r.durasi_mati), r.diterima_at]),
             theme: 'striped',
-            headStyles: { fillColor: [30, 30, 30], textColor: 255, fontSize: 8, fontStyle: 'bold' },
-            bodyStyles: { fontSize: 8 }, margin: { left: 14, right: 14 }
+            styles: { font: fontName, fontStyle: 'normal' },
+            headStyles: { font: fontName, fontStyle: 'bold', fillColor: [30, 30, 30], textColor: 255, fontSize: 8 },
+            bodyStyles: { font: fontName, fontStyle: 'normal', fontSize: 8 },
+            margin: { left: 14, right: 14 }
           });
         }
       }
@@ -2046,7 +2127,9 @@
       const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        doc.setFontSize(8); doc.setTextColor(180, 180, 180);
+        doc.setFont(fontName, 'light');
+        doc.setFontSize(8);
+        doc.setTextColor(180, 180, 180);
         doc.text('Halaman ' + i + ' dari ' + pageCount, W / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
       }
 
@@ -2141,7 +2224,13 @@
 
     async function hapusDataGenset() {
       if (!confirm('Hapus semua data genset yang tersimpan di server?')) return;
-      await fetch('/api/genset', { method: 'DELETE' });
+      await fetch('/api/genset', {
+        method: 'DELETE',
+        headers: {
+          'x-api-key': 'tvri-iot-monitor-2026',
+          'x-confirm-delete': 'yes'
+        }
+      });
       showToast('Data genset dihapus', 'success');
       fetchGenset();
     }
@@ -2156,6 +2245,10 @@
     async function exportPDFGenset() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const hasGotham = await loadGothamFonts(doc);
+      const fontName = hasGotham ? 'Gotham' : undefined;
+      doc.setFont(fontName, 'normal');
+
       const judul = document.getElementById('gpdf-judul').value || 'Laporan Monitoring Genset';
       const filename = document.getElementById('gpdf-filename').value || 'laporan genset';
       const incStats = document.getElementById('gpdf-inc-stats').checked;
@@ -2164,18 +2257,25 @@
       const W = doc.internal.pageSize.getWidth();
 
       const logoDataUrl = await getLogoBase64();
-      let curY = gambarHeaderTVRI(doc, W, logoDataUrl);
+      let curY = gambarHeaderTVRI(doc, W, logoDataUrl, fontName);
 
-      doc.setFontSize(13); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 58, 95);
+      doc.setFont(fontName, 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(30, 58, 95);
       doc.text(judul, 14, curY);
-      doc.setFontSize(8.5); doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
+
+      doc.setFont(fontName, 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(100, 100, 100);
       doc.text('Sistem Monitoring Genset — IoT TVRI', 14, curY + 5.5);
       doc.text(tanggal, W - 14, curY + 5.5, { align: 'right' });
       doc.setTextColor(0, 0, 0);
       curY += 13;
 
       if (incStats && gensetStats.total != null) {
-        doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+        doc.setFont(fontName, 'medium');
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
         doc.text('Ringkasan Statistik Genset', 14, curY); curY += 4;
 
         const statsRows = [
@@ -2192,17 +2292,20 @@
           head: [['Parameter', 'Nilai']],
           body: statsRows,
           theme: 'grid',
-          headStyles: { fillColor: [30, 58, 95], textColor: 255, fontSize: 9, fontStyle: 'bold' },
-          bodyStyles: { fontSize: 9 },
+          styles: { font: fontName, fontStyle: 'normal' },
+          headStyles: { font: fontName, fontStyle: 'bold', fillColor: [30, 58, 95], textColor: 255, fontSize: 9 },
+          bodyStyles: { font: fontName, fontStyle: 'normal', fontSize: 9 },
           alternateRowStyles: { fillColor: [240, 244, 255] },
-          columnStyles: { 0: { fontStyle: 'bold', cellWidth: 70 } },
+          columnStyles: { 0: { font: fontName, fontStyle: 'bold', cellWidth: 70 } },
           margin: { left: 14, right: 14 }
         });
         curY = doc.lastAutoTable.finalY + 10;
       }
 
       if (incLog && gensetData.length) {
-        doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(0, 0, 0);
+        doc.setFont(fontName, 'medium');
+        doc.setFontSize(11);
+        doc.setTextColor(0, 0, 0);
         doc.text('Log Detail Data Genset (' + gensetData.length + ' data)', 14, curY); curY += 4;
         doc.autoTable({
           startY: curY,
@@ -2216,18 +2319,22 @@
             r.diterima_at
           ]),
           theme: 'striped',
-          headStyles: { fillColor: [30, 30, 30], textColor: 255, fontSize: 8, fontStyle: 'bold' },
-          bodyStyles: { fontSize: 8 },
+          styles: { font: fontName, fontStyle: 'normal' },
+          headStyles: { font: fontName, fontStyle: 'bold', fillColor: [30, 30, 30], textColor: 255, fontSize: 8 },
+          bodyStyles: { font: fontName, fontStyle: 'normal', fontSize: 8 },
           margin: { left: 14, right: 14 }
         });
       } else if (incLog) {
-        doc.setFontSize(9); doc.setFont(undefined, 'normal'); doc.setTextColor(150, 150, 150);
+        doc.setFont(fontName, 'light');
+        doc.setFontSize(9);
+        doc.setTextColor(150, 150, 150);
         doc.text('Belum ada data genset.', 14, curY + 6);
       }
 
       const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
+        doc.setFont(fontName, 'light');
         doc.setFontSize(8); doc.setTextColor(180, 180, 180);
         doc.text('Halaman ' + i + ' dari ' + pageCount, W / 2, doc.internal.pageSize.getHeight() - 6, { align: 'center' });
       }

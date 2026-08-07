@@ -1,31 +1,31 @@
-# ── Dependencies ──────────────────────────
+
 node_modules/
 
-# ── Database ──────────────────────────────
+
 iot_monitor.db
 iot_monitor.db-shm
 iot_monitor.db-wal
 
-# ── Environment & config sensitif ─────────
+
 .env
 .env.local
 .env.production
 
-# ── Log files ─────────────────────────────
+
 *.log
 npm-debug.log*
 
-# ── OS files ──────────────────────────────
+
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# ── VS Code ───────────────────────────────
+
 .vscode/
 
-# ── Temporary files ───────────────────────
+
 *.tmp
 *.temp
 
-# ── Private / Context Docs ────────────────
+
 PROJECT_CONTEXT.md

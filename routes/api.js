@@ -2,6 +2,19 @@ const express = require('express');
 const router  = express.Router();
 const db      = require('../database');
 
+const API_KEY = process.env.API_KEY;
+
+function cekApiKey(req, res, next) {
+  const key = req.headers['x-api-key'];
+  if (!key || key !== API_KEY) {
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized — API key tidak valid'
+    });
+  }
+  next();
+}
+
 const VALID_DEVICES  = ['sector_1', 'sector_2', 'sector_3', 'sector_4', 'sector_5'];
 const VALID_GENSETS  = ['genset_1', 'genset_2', 'genset_3', 'genset_4', 'genset_5'];
 const SECTOR_TO_GENSET = {
@@ -63,16 +76,17 @@ const stmtLastDurasiAktif   = db.prepare(
 
 // ── Prepared Statements: Heartbeat Genset ────────────────────────────────────
 const stmtUpsertGensetHeartbeat = db.prepare(
-  'INSERT INTO genset_heartbeat (genset_id, last_seen, last_status) ' +
-  'VALUES (@genset_id, @last_seen, @last_status) ' +
+  'INSERT INTO genset_heartbeat (genset_id, last_seen, last_status, waktu_nyala) ' +
+  'VALUES (@genset_id, @last_seen, @last_status, @waktu_nyala) ' +
   'ON CONFLICT(genset_id) DO UPDATE SET ' +
   '  last_seen   = excluded.last_seen,' +
-  '  last_status = excluded.last_status'
+  '  last_status = excluded.last_status,' +
+  '  waktu_nyala = excluded.waktu_nyala'
 );
 const stmtGetGensetHeartbeat = db.prepare('SELECT * FROM genset_heartbeat WHERE genset_id = ?');
 
 // ── POST /api/listrik ────────────────────────────────────────────────────────
-router.post('/listrik', (req, res) => {
+router.post('/listrik', cekApiKey, (req, res) => {
   const { sector_id, status, tegangan, durasi_mati, waktu } = req.body;
 
   if (!sector_id)
@@ -163,7 +177,13 @@ router.get('/listrik/stats', (req, res) => {
 });
 
 // ── DELETE /api/listrik ──────────────────────────────────────────────────────
-router.delete('/listrik', (req, res) => {
+router.delete('/listrik', cekApiKey, (req, res) => {
+  if (req.headers['x-confirm-delete'] !== 'yes') {
+    return res.status(400).json({
+      success: false,
+      message: 'Tambahkan header x-confirm-delete: yes untuk konfirmasi penghapusan'
+    });
+  }
   const { sector_id } = req.query;
   if (sector_id) {
     const jumlah = stmtCountDeleteBySector.get(sector_id).total;
@@ -183,8 +203,8 @@ function normalisasiWaktuGenset(waktu) {
 }
 
 // ── POST /api/genset ─────────────────────────────────────────────────────────
-router.post('/genset', (req, res) => {
-  const { waktu, arus_r, arus_s, daya_r, daya_s, status_pln, status_genset, durasi_aktif, genset_id } = req.body;
+router.post('/genset', cekApiKey, (req, res) => {
+  const { waktu, arus_r, arus_s, daya_r, daya_s, status_pln, status_genset, genset_id } = req.body;
 
   if (!status_pln || !['ON', 'OFF'].includes(String(status_pln).toUpperCase()))
     return res.status(400).json({ success: false, message: 'Field "status_pln" wajib diisi (ON / OFF)' });
@@ -203,9 +223,6 @@ router.post('/genset', (req, res) => {
   let dayaS = daya_s != null ? Math.round(Number(daya_s)) : null;
   if (dayaS != null && (isNaN(dayaS) || dayaS < 0 || dayaS > 100000)) dayaS = null;
 
-  let durasiAktif = durasi_aktif != null ? parseFloat(Number(durasi_aktif).toFixed(2)) : null;
-  if (durasiAktif != null && (isNaN(durasiAktif) || durasiAktif < 0 || durasiAktif > 1440)) durasiAktif = null;
-
   const waktuNormal = normalisasiWaktuGenset(waktu) || new Date().toISOString().slice(0, 19).replace('T', ' ');
   const diterimaAt  = new Date().toLocaleString('id-ID');
   const nowIso      = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -214,7 +231,40 @@ router.post('/genset', (req, res) => {
 
   // Upsert heartbeat genset (gunakan genset_id dari body, default 'genset_1')
   const gId = genset_id && VALID_GENSETS.includes(genset_id) ? genset_id : 'genset_1';
-  stmtUpsertGensetHeartbeat.run({ genset_id: gId, last_seen: nowIso, last_status: statusGenUpper });
+  const hbLama = stmtGetGensetHeartbeat.get(gId);
+
+  let durasiAktif = null;
+  let waktuNyalaUpdate = hbLama ? hbLama.waktu_nyala : null;
+
+  if (statusGenUpper === 'ON') {
+    // Saat status genset berubah OFF -> ON (atau pertama kali ON tanpa waktu_nyala)
+    if (!hbLama || hbLama.last_status !== 'ON' || !hbLama.waktu_nyala) {
+      waktuNyalaUpdate = waktuNormal;
+    }
+    durasiAktif = null;
+  } else if (statusGenUpper === 'OFF') {
+    // Saat status genset berubah ON -> OFF
+    if (hbLama && hbLama.last_status === 'ON' && hbLama.waktu_nyala) {
+      const waktuNyala = hbLama.waktu_nyala;
+      const waktuMati = waktuNormal;
+      const durasi = (new Date(waktuMati.replace(' ', 'T')) - new Date(waktuNyala.replace(' ', 'T'))) / 60000;
+      if (!isNaN(durasi) && durasi >= 0 && durasi <= 1440) {
+        durasiAktif = parseFloat(durasi.toFixed(2));
+      } else {
+        durasiAktif = null;
+      }
+    } else {
+      durasiAktif = null;
+    }
+    // waktuNyalaUpdate dipertahankan agar history nyala tidak hilang
+  }
+
+  stmtUpsertGensetHeartbeat.run({
+    genset_id: gId,
+    last_seen: nowIso,
+    last_status: statusGenUpper,
+    waktu_nyala: waktuNyalaUpdate
+  });
 
   const info = stmtInsertGenset.run({
     arus_r: arusR, arus_s: arusS, daya_r: dayaR, daya_s: dayaS,
@@ -285,7 +335,13 @@ router.get('/genset/stats', (req, res) => {
 });
 
 // ── DELETE /api/genset ───────────────────────────────────────────────────────
-router.delete('/genset', (req, res) => {
+router.delete('/genset', cekApiKey, (req, res) => {
+  if (req.headers['x-confirm-delete'] !== 'yes') {
+    return res.status(400).json({
+      success: false,
+      message: 'Tambahkan header x-confirm-delete: yes untuk konfirmasi penghapusan'
+    });
+  }
   const jumlah = stmtCountGenset.get().total;
   stmtDeleteGenset.run();
   return res.json({ success: true, message: 'Semua data genset dihapus (' + jumlah + ' record)' });

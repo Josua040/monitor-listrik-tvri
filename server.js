@@ -1,7 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-
+const rateLimit = require('express-rate-limit');
 
 require('./database');
 
@@ -10,10 +11,23 @@ const apiRoutes = require('./routes/api');
 const app = express();
 const PORT = 3000;
 
+// Limit untuk endpoint API — max 100 request per menit per IP
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: {
+    success: false,
+    message: 'Terlalu banyak request, coba lagi dalam 1 menit'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/api', apiLimiter);
 app.use('/api', apiRoutes);
 
 app.get('/', (req, res) => {
